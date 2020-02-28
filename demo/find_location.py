@@ -1,149 +1,142 @@
+
 #!/usr/bin/env python
 """
 The Pozyx ready to localize tutorial (c) Pozyx Labs
 Please read the tutorial that accompanies this sketch:
 https://www.pozyx.io/Documentation/Tutorials/ready_to_localize/Python
 
-This tutorial requires at least the contents of the Pozyx Ready to Localize kit. It demonstrates the positioning
-capabilities of the Pozyx device both locally and remotely. Follow the steps to correctly set up your environment in
-the link, change the parameters and upload this sketch. Watch the coordinates change as you move your device around! """
+This tutorial requires at least the contents of the Pozyx Ready to Localize kit. It demonstrates the positioning capabilities
+of the Pozyx device both locally and remotely. Follow the steps to correctly set up your environment in the link, change the
+parameters and upload this sketch. Watch the coordinates change as you move your device around!
+
+"""
 from time import sleep
 
-from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, PozyxConstants, version,
-                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port,
-                     SingleRegister, DeviceList, PozyxRegisters)
+from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, PozyxRegisters, version,
+                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
 from pypozyx.tools.version_check import perform_latest_version_check
 
+from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates, FilterData, AlgorithmData
 
-class ReadyToLocalize(object):
-    """Continuously calls the Pozyx positioning function and prints its position."""
+from datetime import datetime
 
-    def __init__(self, pozyx, osc_udp_client, anchors, algorithm=POZYX_POS_ALG_UWB_ONLY,
-                 dimension=POZYX_3D, height=1000, remote_id=None):
+class MultitagPositioning(object):
+    """Continuously performs multitag positioning"""
+
+    def __init__(self, pozyx, osc_udp_client, tag_ids, anchors, algorithm=PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY,
+                 dimension=PozyxConstants.DIMENSION_3D, height=1000):
         self.pozyx = pozyx
         self.osc_udp_client = osc_udp_client
 
+        self.tag_ids = tag_ids
         self.anchors = anchors
         self.algorithm = algorithm
         self.dimension = dimension
         self.height = height
-        self.remote_id = remote_id
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
-        print("------------POZYX POSITIONING V{} -------------".format(version))
+        print("------------POZYX MULTITAG POSITIONING V{} -------------".format(version))
         print("")
-        print("- System will manually configure tag")
+        print(" - System will manually calibrate the tags")
         print("")
-        print("- System will auto start positioning")
+        print(" - System will then auto start positioning")
         print("")
-        if self.remote_id is None:
-            self.pozyx.printDeviceInfo(self.remote_id)
+        if None in self.tag_ids:
+            for device_id in self.tag_ids:
+                self.pozyx.printDeviceInfo(device_id)
         else:
-            for device_id in [None, self.remote_id]:
+            for device_id in [None] + self.tag_ids:
                 self.pozyx.printDeviceInfo(device_id)
         print("")
-        print("------------POZYX POSITIONING V{} -------------".format(version))
+        print("------------POZYX MULTITAG POSITIONING V{} -------------".format(version))
         print("")
 
         self.setAnchorsManual(save_to_flash=False)
-        self.printPublishConfigurationResult()
+
+        self.printPublishAnchorConfiguration()
 
     def loop(self):
-        """Performs positioning and displays/exports the results."""
-        position = Coordinates()
-        status = self.pozyx.doPositioning(
-            position, self.dimension, self.height, self.algorithm, remote_id=self.remote_id)
-        if status == POZYX_SUCCESS:
-            self.printPublishPosition(position)
-        else:
-            self.printPublishErrorCode("positioning")
+        """Performs positioning and prints the results."""
+        for tag_id in self.tag_ids:
+            position = Coordinates()
+            status = self.pozyx.doPositioning(
+                position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
+            if status == POZYX_SUCCESS:
+                self.printPublishPosition(position, tag_id)
+            else:
+                self.printPublishErrorCode("positioning", tag_id)
 
-    def printPublishPosition(self, position):
+    def printPublishPosition(self, position, network_id):
         """Prints the Pozyx's position and possibly sends it as a OSC packet"""
-        network_id = self.remote_id
         if network_id is None:
             network_id = 0
-        print("POS ID {}, x(mm): {pos.x} y(mm): {pos.y} z(mm): {pos.z}".format(
-            "0x%0.4x" % network_id, pos=position))
+        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
+                                                                 position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
+        print(s)
+        # ms = UWBSettings()
+        # self.pozyx.getUWBSettings(ms,network_id)
+        # print(ms)
+        filename = str(network_id) + "data.txt"
+        file = open(filename, "a") 
+        s += "\n"
+        file.write(s)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
-                "/position", [network_id, int(position.x), int(position.y), int(position.z)])
-
-    def printPublishErrorCode(self, operation):
-        """Prints the Pozyx's error and possibly sends it as a OSC packet"""
-        error_code = SingleRegister()
-        network_id = self.remote_id
-        if network_id is None:
-            self.pozyx.getErrorCode(error_code)
-            print("LOCAL ERROR %s, %s" % (operation, self.pozyx.getErrorMessage(error_code)))
-            if self.osc_udp_client is not None:
-                self.osc_udp_client.send_message("/error", [operation, 0, error_code[0]])
-            return
-        status = self.pozyx.getErrorCode(error_code, self.remote_id)
-        if status == POZYX_SUCCESS:
-            print("ERROR %s on ID %s, %s" %
-                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
-            if self.osc_udp_client is not None:
-                self.osc_udp_client.send_message(
-                    "/error", [operation, network_id, error_code[0]])
-        else:
-            self.pozyx.getErrorCode(error_code)
-            print("ERROR %s, couldn't retrieve remote error code, LOCAL ERROR %s" %
-                  (operation, self.pozyx.getErrorMessage(error_code)))
-            if self.osc_udp_client is not None:
-                self.osc_udp_client.send_message("/error", [operation, 0, -1])
-            # should only happen when not being able to communicate with a remote Pozyx.
+                "/position", [network_id, position.x, position.y, position.z])
 
     def setAnchorsManual(self, save_to_flash=False):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
-        status = self.pozyx.clearDevices(remote_id=self.remote_id)
-        for anchor in self.anchors:
-            status &= self.pozyx.addDevice(anchor, remote_id=self.remote_id)
-        if len(self.anchors) > 4:
-            status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors),
-                                                       remote_id=self.remote_id)
+        for tag_id in self.tag_ids:
+            status = self.pozyx.clearDevices(tag_id)
+            for anchor in self.anchors:
+                status &= self.pozyx.addDevice(anchor, tag_id)
+            if len(anchors) > 3:
+                status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(anchors),
+                                                           remote_id=tag_id)
+            # enable these if you want to save the configuration to the devices.
+            if save_to_flash:
+                self.pozyx.saveAnchorIds(tag_id)
+                self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
 
-        if save_to_flash:
-            self.pozyx.saveAnchorIds(remote_id=self.remote_id)
-            self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], remote_id=self.remote_id)
-        return status
+            self.printPublishConfigurationResult(status, tag_id)
 
-    def printPublishConfigurationResult(self):
-        """Prints and potentially publishes the anchor configuration result in a human-readable way."""
-        list_size = SingleRegister()
+    def printPublishConfigurationResult(self, status, tag_id):
+        """Prints the configuration explicit result, prints and publishes error if one occurs"""
+        if tag_id is None:
+            tag_id = 0
+        if status == POZYX_SUCCESS:
+            print("Configuration of tag %s: success" % tag_id)
+        else:
+            self.printPublishErrorCode("configuration", tag_id)
 
-        self.pozyx.getDeviceListSize(list_size, self.remote_id)
-        print("List size: {0}".format(list_size[0]))
-        if list_size[0] != len(self.anchors):
-            self.printPublishErrorCode("configuration")
-            return
-        device_list = DeviceList(list_size=list_size[0])
-        self.pozyx.getDeviceIds(device_list, self.remote_id)
-        print("Calibration result:")
-        print("Anchors found: {0}".format(list_size[0]))
-        print("Anchor IDs: ", device_list)
-
-        for i in range(list_size[0]):
-            anchor_coordinates = Coordinates()
-            self.pozyx.getDeviceCoordinates(device_list[i], anchor_coordinates, self.remote_id)
-            print("ANCHOR, 0x%0.4x, %s" % (device_list[i], str(anchor_coordinates)))
+    def printPublishErrorCode(self, operation, network_id):
+        """Prints the Pozyx's error and possibly sends it as a OSC packet"""
+        error_code = SingleRegister()
+        status = self.pozyx.getErrorCode(error_code, network_id)
+        if network_id is None:
+            network_id = 0
+        if status == POZYX_SUCCESS:
+            print("Error %s on ID %s, %s" %
+                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
-                    "/anchor", [device_list[i], int(anchor_coordinates.x), int(anchor_coordinates.y),
-                                int(anchor_coordinates.z)])
-                sleep(0.025)
+                    "/error_%s" % operation, [network_id, error_code[0]])
+        else:
+            # should only happen when not being able to communicate with a remote Pozyx.
+            self.pozyx.getErrorCode(error_code)
+            print("Error % s, local error code %s" % (operation, str(error_code)))
+            if self.osc_udp_client is not None:
+                self.osc_udp_client.send_message("/error_%s" % operation, [0, error_code[0]])
 
     def printPublishAnchorConfiguration(self):
-        """Prints and potentially publishes the anchor configuration"""
         for anchor in self.anchors:
-            print("ANCHOR,0x%0.4x,%s" % (anchor.network_id, str(anchor.coordinates)))
+            print("ANCHOR,0x%0.4x,%s" % (anchor.network_id, str(anchor.pos)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
-                    "/anchor", [anchor.network_id, int(anchor.coordinates.x),
-                                int(anchor.coordinates.y), int(anchor.coordinates.z)])
+                    "/anchor", [anchor.network_id, anchor.pos.x, anchor.pos.y, anchor.pos.z])
                 sleep(0.025)
 
 
@@ -153,16 +146,11 @@ if __name__ == "__main__":
     if check_pypozyx_version:
         perform_latest_version_check()
 
-    # shortcut to not have to find out the port yourself
+    # shortcut to not have to find out the port yourself.
     serial_port = get_first_pozyx_serial_port()
     if serial_port is None:
         print("No Pozyx connected. Check your USB cable or your driver!")
         quit()
-
-    remote_id = 0x6979                 # remote device network ID
-    remote = False                   # whether to use a remote device
-    if not remote:
-        remote_id = None
 
     # enable to send position data through OSC
     use_processing = True
@@ -171,15 +159,15 @@ if __name__ == "__main__":
     ip = "127.0.0.1"
     network_port = 8888
 
-    osc_udp_client = None
-    if use_processing:
-        osc_udp_client = SimpleUDPClient(ip, network_port)
 
-    # necessary data for calibration, change the IDs and coordinates yourself according to your measurement
-    anchors = [DeviceCoordinates(0x676C, 1, Coordinates(4000, 4000, 2000)),
-               DeviceCoordinates(0x6738, 1, Coordinates(4000, 0, 1500)),
-               DeviceCoordinates(0x6E2B, 1, Coordinates(0, 4000, 1800)),
-               DeviceCoordinates(0x676E, 1, Coordinates(0, 0, 1600))]
+    # IDs of the tags to position, add None to position the local tag as well.
+    tag_ids = [0x690f, 0x6763, 0x602e, 0x6979, 0x6915]
+
+    # necessary data for calibration
+    anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
+               DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
+               DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
+               DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
 
     # positioning algorithm to use, other is PozyxConstants.POSITIONING_ALGORITHM_TRACKING
     algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
@@ -188,9 +176,14 @@ if __name__ == "__main__":
     # height of device, required in 2.5D positioning
     height = 1000
 
+    osc_udp_client = None
+    if use_processing:
+        osc_udp_client = SimpleUDPClient(ip, network_port)
+
     pozyx = PozyxSerial(serial_port)
-    r = ReadyToLocalize(pozyx, osc_udp_client, anchors, algorithm, dimension, height, remote_id)
+
+    r = MultitagPositioning(pozyx, osc_udp_client, tag_ids, anchors,
+                            algorithm, dimension, height)
     r.setup()
     while True:
         r.loop()
-
