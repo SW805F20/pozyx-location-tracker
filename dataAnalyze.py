@@ -58,12 +58,17 @@ class DataSet:
 
     def printself(self):
         print(len(self.points))
-        print("x min: " + str(self.xmin) + ", xmax: " + str(self.xmax) + ", xmed: " + str(self.xmedian))
-        print("y min: " + str(self.ymin) + ", ymax: " + str(self.ymax) + ", ymed: " + str(self.ymedian))
-        print("z min: " + str(self.zmin) + ", zmax: " + str(self.zmax) + ", zmed: " + str(self.zmedian))
+        return "(x,y) \t& (" + "{:.1f}".format(self.xmedian / 10) + ", "+ "{:.1f}".format(self.ymedian / 10) + ", " + "{:.1f}".format(self.zmedian / 10) + ") \t & (" + "{:.1f}".format(self.xmin / 10) + ") \t& (" + "{:.1f}".format(self.xmax / 10) + ")\t& (" + "{:.1f}".format(self.ymin / 10) + ")\t & (" + "{:.1f}".format(self.ymax / 10) + ") \t & (" + "{:.1f}".format(self.zmin / 10) + ")\t & (" + "{:.1f}".format(self.zmax / 10) + ")\t \\\\ \\hline\n"
+        # print("x min: " + str(self.xmin) + ", xmax: " + str(self.xmax) + ", xmed: " + str(self.xmedian))
+        # print("y min: " + str(self.ymin) + ", ymax: " + str(self.ymax) + ", ymed: " + str(self.ymedian))
+        # print("z min: " + str(self.zmin) + ", zmax: " + str(self.zmax) + ", zmed: " + str(self.zmedian))
 
 def getData(inputString):
     f = open(inputString)
+    resultName = inputString.split("/")[7].replace(".txt", "") + "result.txt"
+    resultFile = open(resultName, "w")
+    startLatexTable = "\\begin{table}[] \n    \\begin{tabular}{|l|l|l|l|l|l|l|l|}\n    \\hline\n    Actual grid & Average grid (x,y,z)   & x min   & x max   & y min    & y max   & z min   & z max    \\\\ \\hline\n"
+    resultFile.write(startLatexTable)
     lines = f.readlines()
     points = []
     for l in lines:
@@ -98,16 +103,18 @@ def getData(inputString):
     for p in dataSets:
         print(i)
         i += 1
-        p.printself()
-
+        resultS = p.printself()
+        resultFile.write(resultS)
+    resultFile.write("\\end{tabular}\n\\label{Tab:one-tag-experiment-result}\\end{table}")
+    resultFile.close
     f.close
 
 
 if __name__ == "__main__":
     #getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
     getData("C:/Users/frede/Desktop/tests/3 tag/test1/24622data.txt")
-    #getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
-    #getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
+    getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
+    getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
 
         
     
