@@ -40,4 +40,4 @@ class SocketMulticastSender(socket.socket):
             sock.close()
 
 sock = SocketMulticastSender(multicast_group=('224.3.29.71', 10000))
-sock.send(b'fuk')
+sock.send(b'test')
