@@ -41,8 +41,3 @@ class SocketMulticastSender(socket.socket):
 
 sock = SocketMulticastSender(multicast_group=('224.3.29.71', 10000))
 sock.send(b'fuk')
-
-
-# https://pythontic.com/modules/socket/udp-client-server-example
-# https://wiki.python.org/moin/UdpCommunication
-# https://pymotw.com/3/socket/multicast.html
