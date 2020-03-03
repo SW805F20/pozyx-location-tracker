@@ -139,51 +139,61 @@ class MultitagPositioning(object):
                     "/anchor", [anchor.network_id, anchor.pos.x, anchor.pos.y, anchor.pos.z])
                 sleep(0.025)
 
-
-if __name__ == "__main__":
-    # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
-    check_pypozyx_version = True
-    if check_pypozyx_version:
-        perform_latest_version_check()
-
-    # shortcut to not have to find out the port yourself.
-    serial_port = get_first_pozyx_serial_port()
-    if serial_port is None:
-        print("No Pozyx connected. Check your USB cable or your driver!")
-        quit()
-
-    # enable to send position data through OSC
-    use_processing = True
-
-    # configure if you want to route OSC to outside your localhost. Networking knowledge is required.
-    ip = "127.0.0.1"
-    network_port = 8888
-
-
-    # IDs of the tags to position, add None to position the local tag as well.
+class PozyxStarter :
+    """Class to set important values as well as setup and start the pozyx data gathering"""
+    mtp = None
+    # IDs of the tags to position, add None to position the local tag as well. There is no None because we are connected to a Anchor
     tag_ids = [0x690f, 0x6763, 0x602e, 0x6979, 0x6915]
 
     # necessary data for calibration
     anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
-               DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
-               DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
-               DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
+            DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
+            DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
+            DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
 
-    # positioning algorithm to use, other is PozyxConstants.POSITIONING_ALGORITHM_TRACKING
-    algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
-    # positioning dimension. Others are PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D
-    dimension = PozyxConstants.DIMENSION_3D
-    # height of device, required in 2.5D positioning
-    height = 1000
+    def setup(self):
+        # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
+        check_pypozyx_version = True
+        if check_pypozyx_version:
+            perform_latest_version_check()
 
-    osc_udp_client = None
-    if use_processing:
-        osc_udp_client = SimpleUDPClient(ip, network_port)
+        # shortcut to not have to find out the port yourself.
+        serial_port = get_first_pozyx_serial_port()
+        if serial_port is None:
+            print("No Pozyx connected. Check your USB cable or your driver!")
+            quit()
 
-    pozyx = PozyxSerial(serial_port)
+        # enable to send position data through OSC
+        use_processing = True
 
-    r = MultitagPositioning(pozyx, osc_udp_client, tag_ids, anchors,
-                            algorithm, dimension, height)
-    r.setup()
-    while True:
-        r.loop()
+        # configure if you want to route OSC to outside your localhost. Networking knowledge is required.
+        ip = "127.0.0.1"
+        network_port = 8888
+        # positioning algorithm to use, other is PozyxConstants.POSITIONING_ALGORITHM_TRACKING
+        algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
+        # positioning dimension. Others are PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D
+        dimension = PozyxConstants.DIMENSION_3D
+        # height of device, required in 2.5D positioning
+        height = 1000
+
+        osc_udp_client = None
+        if use_processing:
+            osc_udp_client = SimpleUDPClient(ip, network_port)
+
+        pozyx = PozyxSerial(serial_port)
+
+        self.mtp = MultitagPositioning(pozyx, osc_udp_client, self.tag_ids, self.anchors,
+                                algorithm, dimension, height)
+        self.mtp.setup()
+
+    def Start(self):
+        while True:
+            self.mtp.loop()
+    
+
+
+if __name__ == "__main__":
+    a = PozyxStarter()
+    a.setup()
+    a.Start()
+

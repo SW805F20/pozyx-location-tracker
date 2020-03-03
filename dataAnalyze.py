@@ -65,7 +65,7 @@ class DataSet:
 
 def getData(inputString):
     f = open(inputString)
-    resultName = inputString.split("/")[7].replace(".txt", "") + "result.txt"
+    resultName = inputString.replace(".txt", "") + "result.txt"
     resultFile = open(resultName, "w")
     startLatexTable = "\\begin{table}[] \n    \\begin{tabular}{|l|l|l|l|l|l|l|l|}\n    \\hline\n    Actual grid & Average grid (x,y,z)   & x min   & x max   & y min    & y max   & z min   & z max    \\\\ \\hline\n"
     resultFile.write(startLatexTable)
@@ -111,10 +111,15 @@ def getData(inputString):
 
 
 if __name__ == "__main__":
-    #getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
-    getData("C:/Users/frede/Desktop/tests/3 tag/test1/24622data.txt")
     getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
     getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
+    getData("C:/Users/frede/Desktop/tests/3 tag/test1/24622data.txt")
+
+    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26895data.txt")
+    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/24622data.txt")
+    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26467data.txt")
+    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26901data.txt")
+    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/27001data.txt")
 
         
     
