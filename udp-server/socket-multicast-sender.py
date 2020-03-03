@@ -22,28 +22,12 @@ class SocketMulticastSender(socket.socket):
         # IPPROTO_IP and IP_MULTICAST_TTL are constants used for the options to make the socket multicast aware.
         self.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, struct.pack('b', 1))
     def send(self, message):
-        try:
             # Send data to the multicast group
-            print('sending {!r}'.format(message))
+        print('sending {!r}'.format(message))
             # Send message to all clients listening on the multicast_group
-            sock.sendto(message, self.multicast_group)
+        sock.sendto(message, self.multicast_group)
 
-            # Look for responses from all recipients
-            while True:
-                print('waiting to receive')
-                try:
-                    # Receive message of bufsize 16 and also receive the address of the messenger
-                    data, server = sock.recvfrom(16)
-                except socket.timeout:
-                    print('timed out, no more responses')
-                    break
-                else:
-                    print('received {!r} from {}'.format(
-                        data, server))
-
-        finally:
-            print('closing socket')
-            sock.close()
 
 sock = SocketMulticastSender(multicast_group=('224.3.29.71', 10000))
-sock.send(b'test')
+while True:
+    sock.send(b'test')
