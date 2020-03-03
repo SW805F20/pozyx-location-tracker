@@ -112,6 +112,7 @@ class MultitagPositioning(object):
     def printPublishErrorCode(self, operation, network_id):
         """Prints the Pozyx's error and possibly sends it as a OSC packet"""
         error_code = SingleRegister()
+        # is succes if it finds an errorcode
         status = self.pozyx.getErrorCode(error_code, network_id)
         if network_id is None:
             network_id = 0
