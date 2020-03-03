@@ -4,7 +4,7 @@ import sys
 
 class SocketMulticastReceiver(socket.socket):
     def __init__(self, multicast_group, server_address):
-        # Create the socket
+        # Create the socket using ipv4 and UDP
         socket.socket.__init__(self, socket.AF_INET, socket.SOCK_DGRAM)
 
         # Bind to the server address
@@ -13,6 +13,7 @@ class SocketMulticastReceiver(socket.socket):
         # Tell the operating system to add the socket to
         # the multicast group on all interfaces.
         group = socket.inet_aton(multicast_group)
+        # struct.pack() returns the object as bytes
         mreq = struct.pack('4sL', group, socket.INADDR_ANY)
         self.setsockopt(
             socket.IPPROTO_IP,
