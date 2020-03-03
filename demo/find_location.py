@@ -99,7 +99,7 @@ class MultitagPositioning(object):
             for anchor in self.anchors:
                 status &= self.pozyx.addDevice(anchor, tag_id)
             if len(self.anchors) > 3:
-                status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(anchors),
+                status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors),
                                                            remote_id=tag_id)
             # enable these if you want to save the configuration to the devices.
             if save_to_flash:
