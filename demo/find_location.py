@@ -78,16 +78,13 @@ class MultitagPositioning(object):
         """Prints the Pozyx's position and possibly sends it as a OSC packet"""
         if network_id is None:
             network_id = 0
-        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
+        pozyxLocation = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
                                                                  position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
-        print(s)
-        # ms = UWBSettings()
-        # self.pozyx.getUWBSettings(ms,network_id)
-        # print(ms)
+        print(pozyxLocation)
         filename = str(network_id) + "data.txt"
         file = open(filename, "a") 
         s += "\n"
-        file.write(s)
+        file.write(pozyxLocation)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
                 "/position", [network_id, position.x, position.y, position.z])
@@ -120,6 +117,7 @@ class MultitagPositioning(object):
     def printPublishErrorCode(self, operation, network_id):
         """Prints the Pozyx's error and possibly sends it as a OSC packet"""
         error_code = SingleRegister()
+        # is succes if it finds an errorcode
         status = self.pozyx.getErrorCode(error_code, network_id)
         if network_id is None:
             network_id = 0
@@ -202,3 +200,30 @@ if __name__ == "__main__":
     a.setup()
     a.Start()
 
+<<<<<<< HEAD
+=======
+    # necessary data for calibration because we need the location of the anchors to do the calculations
+    anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
+               DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
+               DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
+               DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
+
+    # positioning algorithm to use, other is PozyxConstants.POSITIONING_ALGORITHM_TRACKING
+    algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
+    # positioning dimension. Others are PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D
+    dimension = PozyxConstants.DIMENSION_3D
+    # height of device, required in 2.5D positioning
+    height = 1000
+
+    osc_udp_client = None
+    if use_processing:
+        osc_udp_client = SimpleUDPClient(ip, network_port)
+
+    pozyx = PozyxSerial(serial_port)
+
+    r = MultitagPositioning(pozyx, osc_udp_client, tag_ids, anchors,
+                            algorithm, dimension, height)
+    r.setup()
+    while True:
+        r.loop()
+>>>>>>> dataanal
