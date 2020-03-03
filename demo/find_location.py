@@ -73,13 +73,13 @@ class MultitagPositioning(object):
         """Prints the Pozyx's position and possibly sends it as a OSC packet"""
         if network_id is None:
             network_id = 0
-        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
+        pozyxLocation = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
                                                                  position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
-        print(s)
+        print(pozyxLocation)
         filename = str(network_id) + "data.txt"
         file = open(filename, "a") 
         s += "\n"
-        file.write(s)
+        file.write(pozyxLocation)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
                 "/position", [network_id, position.x, position.y, position.z])
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # IDs of the tags to position, add None to position the local tag as well.
     tag_ids = [0x690f, 0x6763, 0x602e, 0x6979, 0x6915]
 
-    # necessary data for calibration
+    # necessary data for calibration because we need the location of the anchors to do the calculations
     anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
                DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
                DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
