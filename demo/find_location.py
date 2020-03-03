@@ -1,24 +1,29 @@
 
-#!/usr/bin/env python
+# !/usr/bin/env python
 """
 The Pozyx ready to localize tutorial (c) Pozyx Labs
 Please read the tutorial that accompanies this sketch:
 https://www.pozyx.io/Documentation/Tutorials/ready_to_localize/Python
 
-This tutorial requires at least the contents of the Pozyx Ready to Localize kit. It demonstrates the positioning capabilities
-of the Pozyx device both locally and remotely. Follow the steps to correctly set up your environment in the link, change the
-parameters and upload this sketch. Watch the coordinates change as you move your device around!
+This tutorial requires at least the contents of the Pozyx Ready to
+Localize kit. It demonstrates the positioning capabilities
+of the Pozyx device both locally and remotely. Follow the steps to
+correctly set up your environment in the link, change the
+parameters and upload this sketch. Watch the coordinates change as
+you move your device around!
 
 """
 from time import sleep
 
-from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, PozyxRegisters, version,
-                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
+from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS,
+                    PozyxRegisters, version,
+                    DeviceCoordinates, PozyxSerial, 
+                    get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
 from pypozyx.tools.version_check import perform_latest_version_check
 
-from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates, FilterData, AlgorithmData
+from pypozyx.structures.device import Coordinates, DeviceCoordinates
 
 from datetime import datetime
 
@@ -93,7 +98,7 @@ class MultitagPositioning(object):
             status = self.pozyx.clearDevices(tag_id)
             for anchor in self.anchors:
                 status &= self.pozyx.addDevice(anchor, tag_id)
-            if len(anchors) > 3:
+            if len(self.anchors) > 3:
                 status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(anchors),
                                                            remote_id=tag_id)
             # enable these if you want to save the configuration to the devices.
