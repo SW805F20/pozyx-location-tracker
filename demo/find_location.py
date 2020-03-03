@@ -76,9 +76,6 @@ class MultitagPositioning(object):
         s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
                                                                  position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
         print(s)
-        # ms = UWBSettings()
-        # self.pozyx.getUWBSettings(ms,network_id)
-        # print(ms)
         filename = str(network_id) + "data.txt"
         file = open(filename, "a") 
         s += "\n"
