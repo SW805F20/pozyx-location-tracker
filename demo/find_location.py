@@ -196,7 +196,7 @@ class PozyxStarter :
 
 
 if __name__ == "__main__":
-    a = PozyxStarter()
-    a.setup()
-    a.Start()
+    ps = PozyxStarter()
+    ps.setup()
+    ps.Start()
 
