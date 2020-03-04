@@ -83,7 +83,7 @@ class MultitagPositioning(object):
         print(pozyxLocation)
         filename = str(network_id) + "data.txt"
         file = open(filename, "a") 
-        s += "\n"
+        pozyxLocation += "\n"
         file.write(pozyxLocation)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
