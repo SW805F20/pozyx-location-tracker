@@ -1,13 +1,9 @@
 
 from find_location import PozyxStarter
 
-from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, PozyxRegisters, version,
-                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
-from pythonosc.udp_client import SimpleUDPClient
+from pypozyx import Coordinates
 
-from pypozyx.tools.version_check import perform_latest_version_check
-
-from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates, FilterData, AlgorithmData
+from pypozyx.structures.device import  DeviceCoordinates
 
 
 _anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
