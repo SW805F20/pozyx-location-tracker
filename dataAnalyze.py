@@ -95,12 +95,19 @@ def getData(inputString):
             dp = DataPoint(x, y, z, id, time)
             points.append(dp)
 
+    initTime = points[0].time - 1 
+    lastTime = 0
+    for p in points:
+        p.time = p.time - initTime
+        if lastTime + 35 < p.time:
+            p.time = p.time - 40
+        print(p.time)
+
     clusteredPoints = []
     clusteredPoints.append([])
     i = 0
     moving = False
     time = points[0].time
-    print(time)
     for p in points:
         if time + 5 > p.time:
             if moving == False:
@@ -114,12 +121,16 @@ def getData(inputString):
             else:
                 moving = False   
             time = time + 5
+            print("-----5-----" + str(time))
         else:
             if moving == False:
                 i += 1
                 clusteredPoints.append([])
                 clusteredPoints[i].append(p)    
             time = time + 10
+            print("-----10----")
+
+        print(p.time)
 
     dataSets = []
     for p in clusteredPoints:
@@ -142,7 +153,7 @@ if __name__ == "__main__":
     # getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
     # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
     # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
-    getData("C:/Users/frede/Desktop/tests/3 tag/test1/24622data.txt")
+    getData("F:/tests/5 tag/test1/24622data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26895data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/24622data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26467data.txt")
