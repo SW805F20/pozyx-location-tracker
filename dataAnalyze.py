@@ -57,7 +57,6 @@ class DataSet:
         self.zmedian = zsum / noPoints
 
     def printself(self):
-        print(len(self.points))
         str = "(x,y) \t& (" + "{:.1f}".format(self.xmedian / 10) + ", "
         str += "{:.1f}".format(self.ymedian / 10) + ", "
         str += "{:.1f}".format(self.zmedian / 10)
@@ -101,17 +100,20 @@ def getData(inputString):
     i = 0
     moving = False
     time = points[0].time
+    print(time)
     for p in points:
         if time + 5 > p.time:
             if not moving:
                 clusteredPoints[i].append(p)
         else:
-            if not moving:
+            if moving == False:
+                i += 1
                 clusteredPoints.append([])
                 clusteredPoints[i].append(p)
-                i += 1
-            time = p.time
-            moving = not moving
+                moving = True
+            else:
+                moving = False
+            time = time + 5
 
     dataSets = []
     for p in clusteredPoints:
@@ -120,7 +122,6 @@ def getData(inputString):
 
     i = 0
     for p in dataSets:
-        print(i)
         i += 1
         resultS = p.printself()
         resultFile.write(resultS)
@@ -132,8 +133,9 @@ def getData(inputString):
 
 
 if __name__ == "__main__":
-    getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
-    getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
+    # getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
+    # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
+    # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
     getData("C:/Users/frede/Desktop/tests/3 tag/test1/24622data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26895data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/24622data.txt")
