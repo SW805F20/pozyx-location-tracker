@@ -103,17 +103,23 @@ def getData(inputString):
     print(time)
     for p in points:
         if time + 5 > p.time:
-            if not moving:
+            if moving == False:
                 clusteredPoints[i].append(p)
+        elif time + 10 > p.time:
+            if moving == False:
+                i += 1
+                clusteredPoints.append([])
+                clusteredPoints[i].append(p) 
+                moving = True
+            else:
+                moving = False   
+            time = time + 5
         else:
             if moving == False:
                 i += 1
                 clusteredPoints.append([])
-                clusteredPoints[i].append(p)
-                moving = True
-            else:
-                moving = False
-            time = time + 5
+                clusteredPoints[i].append(p)    
+            time = time + 10
 
     dataSets = []
     for p in clusteredPoints:
