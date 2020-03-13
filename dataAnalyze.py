@@ -116,10 +116,10 @@ def getData(inputString):
             if moving == False:
                 i += 1
                 clusteredPoints.append([])
-                clusteredPoints[i].append(p) 
                 moving = True
             else:
-                moving = False   
+                moving = False  
+                clusteredPoints[i].append(p)  
             time = time + 5
             print("-----5-----" + str(time))
         else:
@@ -153,7 +153,8 @@ if __name__ == "__main__":
     # getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
     # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
     # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
-    getData("F:/tests/5 tag/test1/24622data.txt")
+    getData("F:/tests/5 tag/test1/26467data.txt")
+    
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26895data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/24622data.txt")
     # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26467data.txt")
