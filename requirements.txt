@@ -1,3 +1,4 @@
 python-osc
 pypozyx
 requests
+pytest

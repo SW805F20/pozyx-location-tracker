@@ -1,6 +1,7 @@
 import re
 
-class Setup():
+
+class Setup:
     amountOfPlayers = 0
     playerTags = []
     ballTag = ""
@@ -19,7 +20,6 @@ class Setup():
                 break
             else:
                 print("The input must be an integer, please try again.")
-                   
 
     def promptBallTag(self):
         """ 
@@ -38,28 +38,62 @@ class Setup():
         Function that prompts the user for the anchors' coordinates.
         """
         # assumes that there are 4 anchors
-        for i in range(1,5):
+        for i in range(1, 5):
             while True:
                 string = input("Position of anchor {}: ".format(i))
                 coordinates = string.split()
                 if self.verifyAnchorCoordinates(coordinates):
                     break
-                
+
             self.anchors.append(Anchor(coordinates[0], coordinates[1], coordinates[2]))
+        self.anchors = self.sort_anchors()
+
+    def sort_anchors(self):
+        """
+        Function that sorts the anchors to ensure that they are in clockwise order
+        """
+        center_x = 0
+
+        sw_corner = None
+        nw_corner = None
+        ne_corner = None
+        se_corner = None
+
+        # Calculate the center x-coordinate of the playing field
+        for anchor in self.anchors:
+            center_x = center_x + int(anchor.x)
+        center_x = center_x / len(self.anchors)
+
+        # Find the lowest x value left of center
+        for anchor in (anchor for anchor in self.anchors if int(anchor.x) <= int(center_x)):
+            if sw_corner is None or int(anchor.y) < int(sw_corner.y):
+                nw_corner = sw_corner
+                sw_corner = anchor
+            else:
+                nw_corner = anchor
+
+        # Find the lowest x value right of center
+        for anchor in (anchor for anchor in self.anchors if int(anchor.x) >= int(center_x)):
+            if ne_corner is None or int(anchor.y) > int(ne_corner.y):
+                se_corner = ne_corner
+                ne_corner = anchor
+            else:
+                se_corner = anchor
+
+        return [sw_corner, nw_corner, ne_corner, se_corner]
 
     def promptPlayerTags(self):
         """ 
         Function that prompts the user the players' tags.
         """
         for i in range(1, self.amountOfPlayers + 1):
-            while True:    
+            while True:
                 playerTag = input("Player {}'s tag: ".format(i))
                 if self.isHex(playerTag):
                     self.playerTags.append(playerTag)
                     break
                 else:
                     print("Player tag must be hexadecimal, please try again.")
-            
 
     def isHex(self, x):
         """ 
@@ -92,7 +126,7 @@ class Setup():
         Parameters:
             coordinates [(string)]: list of strings.
         """
-        
+
         if len(coordinates) != 3:
             print("You must enter 3 coordinates, please try again.")
             return False
@@ -106,12 +140,11 @@ class Setup():
             except ValueError:
                 print("Anchor coordinate value must be an integer, please try again.")
                 return False
-        
+
         return True
 
-            
 
-class Anchor():
+class Anchor:
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
