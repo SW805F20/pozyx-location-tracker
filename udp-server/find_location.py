@@ -58,6 +58,8 @@ class MultitagPositioning(object):
         """
         position = Coordinates()
         status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, tag_id)
+        position.x = position.x / 10
+        position.y = position.y / 10
         return position
         
 
