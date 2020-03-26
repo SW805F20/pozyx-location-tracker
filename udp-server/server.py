@@ -14,7 +14,7 @@ class Server() :
         self.setup = Setup()
         self.setup.start()
         self.multicast_sender = SocketMulticastSender(('224.3.29.71', 10000), 0.2)
-        if shouldMock :
+        if should_mock :
             self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
         else:
             self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags, self.setup.anchors)
