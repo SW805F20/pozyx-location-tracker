@@ -2,54 +2,54 @@ import re
 
 
 class Setup:
-	amountOfPlayers = 0
-	playerTags = []
-	ballTag = ""
+	amount_of_players = 0
+	player_tags = []
+	ball_tag = ""
 	anchors = []
 	# Dependent on the unit of measurement used. This is assumed to be millimeters
 	ANCHOR_COORDINATE_LIMIT = 100000
 
 	def start(self):
-		self.promptAmountOfPlayers()
-		self.promptPlayerTags()
-		self.promptAnchors()
-		self.promptBallTag()
+		self.prompt_amount_of_players()
+		self.prompt_player_tags()
+		self.prompt_anchors()
+		self.prompt_ball_tag()
 	
-	def promptAmountOfPlayers(self):
+	def prompt_amount_of_players(self):
 		"""
 		Function that prompts the user for the amount of players in the game.
 		"""
 		while True:
-			amountOfPlayers = input("Amount of players? ")
-			if self.isInt(amountOfPlayers):
-				self.amountOfPlayers = int(amountOfPlayers)
+			amount_of_players = input("Amount of players? ")
+			if self.is_int(amount_of_players):
+				self.amount_of_players = int(amount_of_players)
 				break
 			else:
 				print("The input must be an integer, please try again.")
 
-	def promptBallTag(self):
+	def prompt_ball_tag(self):
 		"""
 		Function that prompts the user for the ball tag.
 		"""
 		while True:
-			ballTag = input("Ball tag: ")
-			if self.isHex(ballTag):
-				self.ballTag = ballTag
+			ball_tag = input("Ball tag: ")
+			if self.is_hex(ball_tag):
+				self.ball_tag = ball_tag
 				break
 			else:
 				print("Ball tag must be hexadecimal, please try again.")
 
-	def promptAnchors(self):
+	def prompt_anchors(self):
 		"""
 		Function that prompts the user for the anchors' coordinates.
 		"""
 		# assumes that there are 4 anchors
 		for i in range(1, 5):
 			while True:
-				anchorId = input("Id of anchor {}: ".format(i))
+				anchor_id = input("Id of anchor {}: ".format(i))
 				string = input("Position of anchor {}: ".format(i))
 				coordinates = string.split()
-				if self.verifyAnchorCoordinates(coordinates) and self.isHex(anchorId):
+				if self.verify_anchor_coordinates(coordinates) and self.is_hex(anchor_id):
 					break
 
 
@@ -90,20 +90,20 @@ class Setup:
 
 		return [sw_corner, nw_corner, ne_corner, se_corner]
 
-	def promptPlayerTags(self):
+	def prompt_player_tags(self):
 		""" 
 		Function that prompts the user the players' tags.
 		"""
-		for i in range(1, self.amountOfPlayers + 1):
+		for i in range(1, self.amount_of_players + 1):
 			while True:
-				playerTag = input("Player {}'s tag: ".format(i))
-				if self.isHex(playerTag):
-					self.playerTags.append(playerTag)
+				player_tag = input("Player {}'s tag: ".format(i))
+				if self.is_hex(player_tag):
+					self.player_tags.append(player_tag)
 					break
 				else:
 					print("Player tag must be hexadecimal, please try again.")
 
-	def isHex(self, x):
+	def is_hex(self, x):
 		""" 
 		Function that checks if a string is a hexadecimal
 
@@ -114,7 +114,7 @@ class Setup:
 			return True
 		return False
 
-	def isInt(self, x):
+	def is_int(self, x):
 		""" 
 		Function that checks if a string is an integer
 
@@ -127,7 +127,7 @@ class Setup:
 		except ValueError:
 			return False
 
-	def verifyAnchorCoordinates(self, coordinates):
+	def verify_anchor_coordinates(self, coordinates):
 		""" 
 		Function that verifies a list of strings by checking if it is three integer coordinates for an Anchor
 
@@ -163,7 +163,7 @@ class Anchor():
 
 if __name__ == "__main__":
 	setup = Setup()
-	setup.promptAmountOfPlayers()
-	setup.promptPlayerTags()
-	setup.promptAnchors()
-	setup.promptBallTag()
+	setup.prompt_amount_of_players()
+	setup.prompt_player_tags()
+	setup.prompt_anchors()
+	setup.prompt_ball_tag()

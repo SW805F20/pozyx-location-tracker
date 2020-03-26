@@ -41,12 +41,12 @@ class MultitagPositioning(object):
         if serial_port is None:
             print("No Pozyx connected. Check your USB cable or your driver!")
             quit()
-        deviceAnchors = []
+        device_anchors = []
 
         for anchor in anchors:
-            deviceAnchors.append(DeviceCoordinates(anchor.id), 0, Coordinates(anchor.x, anchor.y, anchor.z))
+            device_anchors.append(DeviceCoordinates(anchor.id), 0, Coordinates(anchor.x, anchor.y, anchor.z))
         
-        self.anchors = deviceAnchors
+        self.anchors = device_anchors
         self.pozyx = PozyxSerial(serial_port)
         self.setup()
 
@@ -79,9 +79,9 @@ class MultitagPositioning(object):
         print("------------POZYX MULTITAG POSITIONING V{} -------------".format(version))
         print("")
 
-        self.setAnchorsManual(save_to_flash=False)
+        self.set_anchors_manual(save_to_flash=False)
 
-        self.printPublishAnchorConfiguration()
+        self.print_publish_anchor_configuration()
 
     def loop(self):
         """Performs positioning and prints the results."""
@@ -90,26 +90,26 @@ class MultitagPositioning(object):
             status = self.pozyx.doPositioning(
                 position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
             if status == POZYX_SUCCESS:
-                self.printPublishPosition(position, tag_id)
+                self.print_publish_position(position, tag_id)
             else:
-                self.printPublishErrorCode("positioning", tag_id)
+                self.print_publish_error_code("positioning", tag_id)
 
-    def printPublishPosition(self, position, network_id):
+    def print_publish_position(self, position, network_id):
         """Prints the Pozyx's position and possibly sends it as a OSC packet"""
         if network_id is None:
             network_id = 0
-        pozyxLocation = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
+        pozyx_location = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
                                                                                             position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
-        print(pozyxLocation)
+        print(pozyx_location)
         filename = str(network_id) + "data.txt"
         file = open(filename, "a")
-        pozyxLocation += "\n"
-        file.write(pozyxLocation)
+        pozyx_location += "\n"
+        file.write(pozyx_location)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
                 "/position", [network_id, position.x, position.y, position.z])
 
-    def setAnchorsManual(self, save_to_flash=False):
+    def set_anchors_manual(self, save_to_flash=False):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
         for tag_id in self.tag_ids:
             status = self.pozyx.clearDevices(tag_id)
@@ -124,18 +124,18 @@ class MultitagPositioning(object):
                 self.pozyx.saveRegisters(
                     [PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
 
-            self.printPublishConfigurationResult(status, tag_id)
+            self.print_publish_configuration_result(status, tag_id)
 
-    def printPublishConfigurationResult(self, status, tag_id):
+    def print_publish_configuration_result(self, status, tag_id):
         """Prints the configuration explicit result, prints and publishes error if one occurs"""
         if tag_id is None:
             tag_id = 0
         if status == POZYX_SUCCESS:
             print("Configuration of tag %s: success" % tag_id)
         else:
-            self.printPublishErrorCode("configuration", tag_id)
+            self.print_publish_error_code("configuration", tag_id)
 
-    def printPublishErrorCode(self, operation, network_id):
+    def print_publish_error_code(self, operation, network_id):
         """Prints the Pozyx's error and possibly sends it as a OSC packet"""
         error_code = SingleRegister()
         # is succes if it finds an errorcode
@@ -157,7 +157,7 @@ class MultitagPositioning(object):
                 self.osc_udp_client.send_message(
                     "/error_%s" % operation, [0, error_code[0]])
 
-    def printPublishAnchorConfiguration(self):
+    def print_publish_anchor_configuration(self):
         for anchor in self.anchors:
             print("ANCHOR,0x%0.4x,%s" % (anchor.network_id, str(anchor.pos)))
             if self.osc_udp_client is not None:

@@ -2,55 +2,55 @@ from package_formatter import PackageFormatter
 
 def test_formatPosition_maxvalue():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(65535, 65535, 255, 255, 255))
+	package = hex(formatter.format_position(65535, 65535, 255, 255, 255))
 	assert package == '0xffffffffffffff'
 
 def test_formatPosition_minvalue():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(0, 0, 0, 0, 0))
+	package = hex(formatter.format_position(0, 0, 0, 0, 0))
 	assert package == '0x0'
 
 def test_formatPosition_posY_zero():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(0, 10000, 1, 1, 1))
+	package = hex(formatter.format_position(0, 10000, 1, 1, 1))
 	assert package == '0x2710010101'
 
 def test_formatPosition_posX_zero():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(10000, 0, 1, 1, 1))
+	package = hex(formatter.format_position(10000, 0, 1, 1, 1))
 	assert package == '0x27100000010101'
 
 def test_formatPosition_id_zero():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(10000, 10000, 0, 1, 1))
+	package = hex(formatter.format_position(10000, 10000, 0, 1, 1))
 	assert package == '0x27102710000101'
 
 def test_formatPosition_timestamp_zero():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(10000, 10000, 1, 0, 1))
+	package = hex(formatter.format_position(10000, 10000, 1, 0, 1))
 	assert package == '0x27102710010001'
 
 def test_formatPosition_packageType_zero():
 	formatter = PackageFormatter()
-	package = hex(formatter.formatPosition(10000, 10000, 1, 1, 0))
+	package = hex(formatter.format_position(10000, 10000, 1, 1, 0))
 	assert package == '0x27102710010100'
 
 def test_formatAnchorPoisition_sets_correct_packageId():
 	formatter = PackageFormatter()
-	package = formatter.formatAnchorPosition(1, 1, 10000, 10000)
+	package = formatter.format_anchor_position(1, 1, 10000, 10000)
 	assert package == '0x27102710010100'
 
 def test_formatPlayerPosition_sets_correct_packageId():
 	formatter = PackageFormatter()
-	package = formatter.formatPlayerPosition(1, 1, 10000, 10000)
+	package = formatter.format_player_position(1, 1, 10000, 10000)
 	assert package == '0x27102710010101'
 
 def test_formatGoalPosition_sets_correct_packageId():
 	formatter = PackageFormatter()
-	package = formatter.formatGoalPosition(1, 1, 10000, 10000)
+	package = formatter.format_goal_position(1, 1, 10000, 10000)
 	assert package == '0x27102710010102'
 
 def test_formatGoalScored_sets_correct_packageId():
 	formatter = PackageFormatter()
-	package = formatter.formatGoalScored(1, 100, 100)
+	package = formatter.format_goal_scored(1, 100, 100)
 	assert package == '0x64640103'
