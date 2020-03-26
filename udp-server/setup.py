@@ -52,8 +52,43 @@ class Setup():
                 if self.verifyAnchorCoordinates(coordinates) and self.isHex(anchorId):
                     break
 
-            self.anchors.append(
-                Anchor(anchorId, coordinates[0], coordinates[1], coordinates[2]))
+
+		self.anchors.append(Anchor(coordinates[0], coordinates[1], coordinates[2]))
+        self.anchors = self.sort_anchors()
+
+    def sort_anchors(self):
+        """
+        Function that sorts the anchors to ensure that they are in clockwise order
+        """
+        center_x = 0
+
+        sw_corner = None
+        nw_corner = None
+        ne_corner = None
+        se_corner = None
+
+        # Calculate the center x-coordinate of the playing field
+        for anchor in self.anchors:
+            center_x = center_x + int(anchor.x)
+        center_x = center_x / len(self.anchors)
+
+        # Find the lowest x value left of center
+        for anchor in (anchor for anchor in self.anchors if int(anchor.x) <= int(center_x)):
+            if sw_corner is None or int(anchor.y) < int(sw_corner.y):
+                nw_corner = sw_corner
+                sw_corner = anchor
+            else:
+                nw_corner = anchor
+
+        # Find the lowest x value right of center
+        for anchor in (anchor for anchor in self.anchors if int(anchor.x) >= int(center_x)):
+            if ne_corner is None or int(anchor.y) > int(ne_corner.y):
+                se_corner = ne_corner
+                ne_corner = anchor
+            else:
+                se_corner = anchor
+
+        return [sw_corner, nw_corner, ne_corner, se_corner]
 
     def promptPlayerTags(self):
         """ 
