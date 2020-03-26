@@ -109,10 +109,10 @@ def test_verifyAnchorCoordinates_too_many_coordinates():
 # Prompt anchors Tests
 def test_verify_anchors_being_corrected():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "200")
-    anchor1 = Anchor("0", "10", "200")
-    anchor2 = Anchor("10", "10", "200")
-    anchor3 = Anchor("10", "0", "200")
+    anchor0 = Anchor("0", "0", "0", "200")
+    anchor1 = Anchor("1", "0", "10", "200")
+    anchor2 = Anchor("2", "10", "10", "200")
+    anchor3 = Anchor("3", "10", "0", "200")
     anchors = [anchor0, anchor2, anchor1, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -123,10 +123,10 @@ def test_verify_anchors_being_corrected():
 
 def test_verify_anchors_being_corrected_2():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "200")
-    anchor1 = Anchor("0", "10", "200")
-    anchor2 = Anchor("10", "10", "200")
-    anchor3 = Anchor("10", "0", "200")
+    anchor0 = Anchor("0", "0", "0", "200")
+    anchor1 = Anchor("1", "0", "10", "200")
+    anchor2 = Anchor("2", "10", "10", "200")
+    anchor3 = Anchor("3", "10", "0", "200")
     anchors = [anchor0, anchor3, anchor1, anchor2]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -137,10 +137,10 @@ def test_verify_anchors_being_corrected_2():
 
 def test_verify_anchors_being_corrected_3():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "200")
-    anchor1 = Anchor("0", "10", "200")
-    anchor2 = Anchor("10", "10", "200")
-    anchor3 = Anchor("10", "0", "200")
+    anchor0 = Anchor("0", "0", "0", "200")
+    anchor1 = Anchor("1", "0", "10", "200")
+    anchor2 = Anchor("2", "10", "10", "200")
+    anchor3 = Anchor("3", "10", "0", "200")
     anchors = [anchor3, anchor2, anchor1, anchor0]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -151,10 +151,10 @@ def test_verify_anchors_being_corrected_3():
 
 def test_verify_anchors_dont_change_if_correct():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "200")
-    anchor1 = Anchor("0", "10", "200")
-    anchor2 = Anchor("10", "10", "200")
-    anchor3 = Anchor("10", "0", "200")
+    anchor0 = Anchor("0", "0", "0", "200")
+    anchor1 = Anchor("1", "0", "10", "200")
+    anchor2 = Anchor("2", "10", "10", "200")
+    anchor3 = Anchor("3", "10", "0", "200")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -166,10 +166,10 @@ def test_verify_anchors_dont_change_if_correct():
 
 def test_verify_anchors_dont_care_about_z_coordinates():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("10", "10", "900")
-    anchor3 = Anchor("10", "0", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "10", "10", "900")
+    anchor3 = Anchor("3", "10", "0", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -180,10 +180,10 @@ def test_verify_anchors_dont_care_about_z_coordinates():
 
 def test_verify_anchors_trapezoid():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("5", "4", "900")
-    anchor3 = Anchor("10", "10", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "5", "4", "900")
+    anchor3 = Anchor("3", "10", "10", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -194,10 +194,10 @@ def test_verify_anchors_trapezoid():
 
 def test_verify_anchors_trapezoid():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("10", "0", "900")
-    anchor3 = Anchor("10", "-5", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "10", "0", "900")
+    anchor3 = Anchor("3", "10", "-5", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -208,10 +208,10 @@ def test_verify_anchors_trapezoid():
 
 def test_verify_anchors_trapezoid_2():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("10", "0", "900")
-    anchor3 = Anchor("10", "-50", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "10", "0", "900")
+    anchor3 = Anchor("3", "10", "-50", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -222,10 +222,10 @@ def test_verify_anchors_trapezoid_2():
 
 def test_verify_anchors_trapezoid_2():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("10", "0", "900")
-    anchor3 = Anchor("10", "-2", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "10", "0", "900")
+    anchor3 = Anchor("3", "10", "-2", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
@@ -237,10 +237,10 @@ def test_verify_anchors_trapezoid_2():
 
 def test_verify_anchors_trapezoid_3():
     setup = Setup()
-    anchor0 = Anchor("0", "0", "15")
-    anchor1 = Anchor("0", "10", "10")
-    anchor2 = Anchor("10", "20", "900")
-    anchor3 = Anchor("10", "0", "3")
+    anchor0 = Anchor("0", "0", "0", "15")
+    anchor1 = Anchor("1", "0", "10", "10")
+    anchor2 = Anchor("2", "10", "20", "900")
+    anchor3 = Anchor("3", "10", "0", "3")
     anchors = [anchor0, anchor1, anchor2, anchor3]
     setup.anchors = anchors
     result = setup.sort_anchors()
