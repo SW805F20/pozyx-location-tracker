@@ -16,9 +16,9 @@ you move your device around!
 from time import sleep
 
 from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS,
-                    PozyxRegisters, version,
-                    DeviceCoordinates, PozyxSerial, 
-                    get_first_pozyx_serial_port, SingleRegister)
+                     PozyxRegisters, version,
+                     DeviceCoordinates, PozyxSerial,
+                     get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
 from pypozyx.tools.version_check import perform_latest_version_check
@@ -27,19 +27,39 @@ from pypozyx.structures.device import Coordinates, DeviceCoordinates
 
 from datetime import datetime
 
+
 class MultitagPositioning(object):
     """Continuously performs multitag positioning"""
 
-    def __init__(self, pozyx, osc_udp_client, tag_ids, anchors, algorithm=PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY,
-                 dimension=PozyxConstants.DIMENSION_3D, height=1000):
-        self.pozyx = pozyx
-        self.osc_udp_client = osc_udp_client
-
+    def __init__(self, tag_ids, anchors):
+        """Initializes posyz and adds tags and to the instance of the class"""
         self.tag_ids = tag_ids
-        self.anchors = anchors
-        self.algorithm = algorithm
-        self.dimension = dimension
-        self.height = height
+        self.algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
+        self.dimension = PozyxConstants.DIMENSION_3D
+        self.height = 1000
+        serial_port = get_first_pozyx_serial_port()
+        if serial_port is None:
+            print("No Pozyx connected. Check your USB cable or your driver!")
+            quit()
+        deviceAnchors = []
+
+        for anchor in anchors:
+            deviceAnchors.append(DeviceCoordinates(anchor.id), 0, Coordinates(anchor.x, anchor.y, anchor.z))
+        
+        self.anchors = deviceAnchors
+        self.pozyx = PozyxSerial(serial_port)
+        self.setup()
+
+    def getPosition(self, tag_id):
+        """
+        Gets the position of a tag
+        Parameters:
+            tag_od (string): hexadecimal id of the tag.
+        """
+        position = Coordinates()
+        status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, tag_id)
+        return position
+        
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
@@ -79,10 +99,10 @@ class MultitagPositioning(object):
         if network_id is None:
             network_id = 0
         pozyxLocation = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}, TimeStamp: {}".format("0x%0.4x" % network_id,
-                                                                 position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
+                                                                                            position.x, position.y, position.z, datetime.now().strftime("%H:%M:%S.%f"))
         print(pozyxLocation)
         filename = str(network_id) + "data.txt"
-        file = open(filename, "a") 
+        file = open(filename, "a")
         pozyxLocation += "\n"
         file.write(pozyxLocation)
         if self.osc_udp_client is not None:
@@ -101,7 +121,8 @@ class MultitagPositioning(object):
             # enable these if you want to save the configuration to the devices.
             if save_to_flash:
                 self.pozyx.saveAnchorIds(tag_id)
-                self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
+                self.pozyx.saveRegisters(
+                    [PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
 
             self.printPublishConfigurationResult(status, tag_id)
 
@@ -130,9 +151,11 @@ class MultitagPositioning(object):
         else:
             # should only happen when not being able to communicate with a remote Pozyx.
             self.pozyx.getErrorCode(error_code)
-            print("Error % s, local error code %s" % (operation, str(error_code)))
+            print("Error % s, local error code %s" %
+                  (operation, str(error_code)))
             if self.osc_udp_client is not None:
-                self.osc_udp_client.send_message("/error_%s" % operation, [0, error_code[0]])
+                self.osc_udp_client.send_message(
+                    "/error_%s" % operation, [0, error_code[0]])
 
     def printPublishAnchorConfiguration(self):
         for anchor in self.anchors:
@@ -142,7 +165,8 @@ class MultitagPositioning(object):
                     "/anchor", [anchor.network_id, anchor.pos.x, anchor.pos.y, anchor.pos.z])
                 sleep(0.025)
 
-class PozyxStarter :
+
+class PozyxStarter:
     """Class to set important values as well as setup and start the pozyx data gathering"""
     mtp = None
     # IDs of the tags to position, add None to position the local tag as well. There is no None because we are connected to a Anchor
@@ -150,9 +174,9 @@ class PozyxStarter :
 
     # necessary data for calibration
     anchors = [DeviceCoordinates(0x676e, 1, Coordinates(0, 0, 2100)),
-            DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
-            DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
-            DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
+               DeviceCoordinates(0x676c, 1, Coordinates(2400, 0, 1900)),
+               DeviceCoordinates(0x6738, 1, Coordinates(2400, 2400, 2100)),
+               DeviceCoordinates(0x6e2b, 1, Coordinates(0, 2400, 1900))]
 
     def setup(self):
         # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
@@ -186,17 +210,15 @@ class PozyxStarter :
         pozyx = PozyxSerial(serial_port)
 
         self.mtp = MultitagPositioning(pozyx, osc_udp_client, self.tag_ids, self.anchors,
-                                algorithm, dimension, height)
+                                       algorithm, dimension, height)
         self.mtp.setup()
 
     def Start(self):
         while True:
             self.mtp.loop()
-    
 
 
 if __name__ == "__main__":
     ps = PozyxStarter()
     ps.setup()
     ps.Start()
-
