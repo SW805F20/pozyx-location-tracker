@@ -54,7 +54,7 @@ class MultitagPositioning(object):
         """
         Gets the position of a tag
         Parameters:
-            tag_od (string): hexadecimal id of the tag.
+            tag_id (string): hexadecimal id of the tag.
         """
         position = Coordinates()
         status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, tag_id)

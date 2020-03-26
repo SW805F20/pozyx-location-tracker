@@ -17,7 +17,7 @@ class Server() :
         if shouldMock :
             self.multiTagPositioning = MockMultiTagPositioning([self.setup.ballTag] + self.setup.playerTags)
         else:
-            self.multiTagPositioning = MultitagPositioning([setup.ballTag] + setup.playerTags, setup.anchors)
+            self.multiTagPositioning = MultitagPositioning([self.setup.ballTag] + self.setup.playerTags, self.setup.anchors)
         self.formatter = PackageFormatter()
 
 
@@ -37,10 +37,10 @@ class Server() :
 
     def updatePlayerPositions(self):
         """Broadcasts updated positions for all players"""
-        for i in range(1, self.setup.amountOfPlayers + 1):
-            playerTag = self.setup.playerTags[i-1]
+        for i in range(0, self.setup.amountOfPlayers):
+            playerTag = self.setup.playerTags[i]
             position = self.multiTagPositioning.getPosition(playerTag)
-            message = self.formatter.formatPlayerPosition(self.timeStamp, i, position.x, position.y)   
+            message = self.formatter.formatPlayerPosition(self.timeStamp, i+1, position.x, position.y)   
             self.multicastSender.send(message)
 
     def sendAnchorPositions(self):

@@ -2,66 +2,62 @@ from setup import Setup, Anchor
 
 
 # isInt tests
-class SetupTest(Setup):
-	def __init__(self):
-		pass
-
 def test_isInt_int_input():
     setup = Setup()
     result = setup.isInt("5")
     assert result is True
 
 def test_isInt_negative_int_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isInt("-5")
     assert result is True
 
 
 def test_isInt_string_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isInt("string")
     assert result is False
 
 
 def test_isInt_float_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isInt("1.43")
     assert result is False
 
 
 # isHex tests
 def test_isHex_correct_hex_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("0x23af")
     assert result is True
 
 
 def test_isHex_wrong_hex_input_1():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("0x67mn")
     assert result is False
 
 
 def test_isHex_wrong_hex_input_2():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("0x0X0x23af")
     assert result is False
 
 
 def test_isHex_string_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("not a hexadecimal")
     assert result is False
 
 
 def test_isHex_int_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("45")
     assert result is True
 
 
 def test_isHex_float_input():
-    setup = SetupTest()
+    setup = Setup()
     result = setup.isHex("0.45")
     assert result is False
 
@@ -69,42 +65,42 @@ def test_isHex_float_input():
 # verifyAnchorCoordinates Tests
 # This method takes a list of strings made from the split of the standard input string
 def test_verifyAnchorCoordinates_correct_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["500", "0", "300"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is True
 
 
 def test_verifyAnchorCoordinates_wrong_string_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["string", "string", "string"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is False
 
 
 def test_verifyAnchorCoordinates_wrong_float_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["2.3", "1.534", "0.00"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is False
 
 
 def test_verifyAnchorCoordinates_wrong_large_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["1000000000", "4", "-20000"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is False
 
 
 def test_verifyAnchorCoordinates_too_few_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["5", "0"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is False
 
 
 def test_verifyAnchorCoordinates_too_many_coordinates():
-    setup = SetupTest()
+    setup = Setup()
     coordinates = ["5", "0", "10", "8"]
     result = setup.verifyAnchorCoordinates(coordinates)
     assert result is False

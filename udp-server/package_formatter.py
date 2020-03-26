@@ -1,4 +1,4 @@
-class PackageFormatter():
+class PackageFormatter:
 	"""formats data to hexadecimal packages"""
 
 	def formatAnchorPosition(self, timeStamp, id, posX, posY):
