@@ -1,5 +1,5 @@
 from decimal import Decimal
-
+import math
 
 class DataPoint:
     x = 0
@@ -14,6 +14,10 @@ class DataPoint:
         self.z = Decimal(z)
         self.id = id
         self.time = int(time.split(".")[0].replace(":", ""))
+
+    def printcsvfile(self):
+        s = str(self.x) + "," + str(self.y) + "," 
+        return s
 
 
 class DataSet:
@@ -69,11 +73,14 @@ class DataSet:
         str += "\\\\ \\hline\n"
         return str
 
+    
 
 def getData(inputString):
     f = open(inputString)
     resultName = inputString.replace(".txt", "") + "result.txt"
+    resultCSVname = inputString.replace(".txt", "") + "csvdata.csv"
     resultFile = open(resultName, "w")
+    resultFileCSV = open(resultCSVname, "w")
     startLatexTable = "\\begin{table}[] \n    "
     startLatexTable += "\\begin{tabular}{|l|l|l|l|l|l|l|l|}\n"
     startLatexTable += "    \\hline\n    Actual grid & Average grid"
@@ -99,8 +106,11 @@ def getData(inputString):
     lastTime = 0
     for p in points:
         p.time = p.time - initTime
-        if lastTime + 35 < p.time:
-            p.time = p.time - 40
+        if lastTime + 39 < p.time:
+            gap = p.time - lastTime
+            factor = math.floor(gap / 40)
+            p.time = p.time - (factor * 40)
+        lastTime = p.time
         print(p.time)
 
     clusteredPoints = []
@@ -142,21 +152,32 @@ def getData(inputString):
         i += 1
         resultS = p.printself()
         resultFile.write(resultS)
+
+    for d in dataSets:
+        for p in d.points:
+            resultCSV = p.printcsvfile()
+            resultCSV += "\n"
+            resultFileCSV.write(resultCSV)
+        resultFileCSV.write("\n")
+        
+        
+
     endstr = "\\end{tabular}\n\\label{Tab:one-tag-experiment-result}"
     endstr += "\\end{table}"
     resultFile.write(endstr)
     resultFile.close
+    resultFileCSV.close
     f.close
 
 
 if __name__ == "__main__":
-    # getData("C:/Users/frede/Desktop/tests/1 tag/test1/26895data.txt")
-    # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26467data.txt")
-    # getData("C:/Users/frede/Desktop/tests/3 tag/test1/26895data.txt")
-    getData("F:/tests/5 tag/test1/26467data.txt")
+    #getData("F:/tests/3 tag/test1/24622data.txt")
+    #getData("F:/tests/3 tag/test1/26467data.txt")
+    #getData("F:/tests/3 tag/test1/26895data.txt")
+    ## getData("F:/tests/1 tag/test1/26895data.txt")
     
-    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26895data.txt")
-    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/24622data.txt")
-    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26467data.txt")
-    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/26901data.txt")
-    # getData("C:/Users/frede/Desktop/tests/5 tag/test1/27001data.txt")
+    getData("F:/tests/5 tag/test1/26895data.txt")
+    getData("F:/tests/5 tag/test1/24622data.txt")
+    getData("F:/tests/5 tag/test1/26467data.txt")
+    getData("F:/tests/5 tag/test1/26901data.txt")
+    getData("F:/tests/5 tag/test1/27001data.txt")
