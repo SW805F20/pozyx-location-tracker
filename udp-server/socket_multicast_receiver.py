@@ -1,6 +1,6 @@
 import socket
 import struct
-import sys
+
 
 class SocketMulticastReceiver(socket.socket):
     def __init__(self, multicast_group, server_address):
@@ -34,7 +34,7 @@ class SocketMulticastReceiver(socket.socket):
             socket.IPPROTO_IP,
             socket.IP_ADD_MEMBERSHIP,
             mreq)
-    
+
     def receive(self):
         """ 
         Function to receive information from the multicast group.

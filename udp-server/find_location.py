@@ -15,9 +15,8 @@ you move your device around!
 """
 from time import sleep
 
-from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS,
-                     PozyxRegisters, version,
-                     DeviceCoordinates, PozyxSerial,
+from pypozyx import (PozyxConstants, POZYX_SUCCESS,
+                     PozyxRegisters, version, PozyxSerial,
                      get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
@@ -61,7 +60,6 @@ class MultitagPositioning(object):
         position.x = position.x / 10
         position.y = position.y / 10
         return position
-        
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
@@ -171,7 +169,8 @@ class MultitagPositioning(object):
 class PozyxStarter:
     """Class to set important values as well as setup and start the pozyx data gathering"""
     mtp = None
-    # IDs of the tags to position, add None to position the local tag as well. There is no None because we are connected to a Anchor
+    # IDs of the tags to position, add None to position the local tag as well. There is no None because we are
+    # connected to a Anchor
     tag_ids = [0x690f, 0x6763, 0x602e, 0x6979, 0x6915]
 
     # necessary data for calibration

@@ -1,4 +1,4 @@
-class MockMultiTagPositioning():
+class MockMultiTagPositioning:
     def __init__(self, tag_ids):
         """Initializes players with hardcoded positions"""
         self.player_dict = {
@@ -8,7 +8,7 @@ class MockMultiTagPositioning():
             tag_ids[3]: TagPosition(50, 50),
             tag_ids[4]: TagPosition(700, 200),
         }
-    
+
     def getPosition(self, tag_id):
         """Get the position of a tag and increments it's position with 2"""
         position = self.player_dict[tag_id]
@@ -16,7 +16,8 @@ class MockMultiTagPositioning():
         self.player_dict[tag_id].y = self.player_dict[tag_id].y + 2
         return position
 
-class TagPosition():
+
+class TagPosition:
     def __init__(self, x, y):
         self.x = x
         self.y = y

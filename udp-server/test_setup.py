@@ -7,6 +7,7 @@ def test_is_int_int_input():
     result = setup.is_int("5")
     assert result is True
 
+
 def test_is_int_negative_int_input():
     setup = Setup()
     result = setup.is_int("-5")
@@ -121,6 +122,7 @@ def test_verify_anchors_being_corrected():
     assert result[2] == anchor2
     assert result[3] == anchor3
 
+
 def test_verify_anchors_being_corrected_2():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "200")
@@ -135,6 +137,7 @@ def test_verify_anchors_being_corrected_2():
     assert result[2] == anchor2
     assert result[3] == anchor3
 
+
 def test_verify_anchors_being_corrected_3():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "200")
@@ -148,6 +151,7 @@ def test_verify_anchors_being_corrected_3():
     assert result[1] == anchor1
     assert result[2] == anchor2
     assert result[3] == anchor3
+
 
 def test_verify_anchors_dont_change_if_correct():
     setup = Setup()
@@ -178,6 +182,7 @@ def test_verify_anchors_dont_care_about_z_coordinates():
     assert result[2] == anchor2
     assert result[3] == anchor3
 
+
 def test_verify_anchors_trapezoid():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
@@ -191,6 +196,7 @@ def test_verify_anchors_trapezoid():
     assert result[1] == anchor1
     assert result[2] == anchor3
     assert result[3] == anchor2
+
 
 def test_verify_anchors_trapezoid():
     setup = Setup()
@@ -206,6 +212,7 @@ def test_verify_anchors_trapezoid():
     assert result[2] == anchor2
     assert result[3] == anchor3
 
+
 def test_verify_anchors_trapezoid_2():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
@@ -219,6 +226,7 @@ def test_verify_anchors_trapezoid_2():
     assert result[1] == anchor1
     assert result[2] == anchor2
     assert result[3] == anchor3
+
 
 def test_verify_anchors_trapezoid_2():
     setup = Setup()
