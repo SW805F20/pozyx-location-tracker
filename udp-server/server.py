@@ -11,6 +11,8 @@ class Server:
     def __init__(self, should_mock=False):
         """
         Initializes the class and either uses mock class for multitag positioning or the real class
+		Parameters:
+			should_mock(boolean): If the server shold use the MockMultiTagePositioning class
         """
         self.time_stamp = 0
         self.setup = Setup()
@@ -28,7 +30,7 @@ class Server:
         while True:
             self.update_ball_position()
             self.update_player_positions()
-            self.time_stamp = (self.time_stamp + 1) % 256
+            self.time_stamp = (self.time_stamp + 1) % 256	# %256 because max value for the time stamp is 255
 
     def update_ball_position(self):
         """Broadcasts the updated ball position"""
@@ -47,7 +49,7 @@ class Server:
 
     def sendAnchorPositions(self):
         """broadcasts the anchor positions"""
-        for i in range(0, 4):
+        for i in range(0, len(self.setup.anchors)):
             anchor = self.setup.anchors[i]
             message = self.formatter.format_anchor_position(self.time_stamp, i, anchor.x, anchor.y)
             self.multicast_sender.send(message)
