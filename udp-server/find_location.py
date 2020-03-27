@@ -31,7 +31,7 @@ class MultitagPositioning(object):
     """Continuously performs multitag positioning"""
 
     def __init__(self, tag_ids, anchors):
-        """Initializes posyz and adds tags and to the instance of the class"""
+        """Initializes pozyx and adds tags to the instance of the class"""
         self.tag_ids = tag_ids
         self.algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
         self.dimension = PozyxConstants.DIMENSION_3D
