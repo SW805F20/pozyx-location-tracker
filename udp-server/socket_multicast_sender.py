@@ -1,6 +1,6 @@
 import socket
 import struct
-import sys
+
 
 class SocketMulticastSender(socket.socket):
     """ 
@@ -10,6 +10,7 @@ class SocketMulticastSender(socket.socket):
         multicast_group ((string, int)): address and port of the multicast group as a tuple
         timeout (number): used to set the timeout for the socket.
     """
+
     def __init__(self, multicast_group, timeout):
         """ 
         The constructor for the SocketMulticastSender
@@ -19,7 +20,7 @@ class SocketMulticastSender(socket.socket):
             timeout (number): used to set the timeout for the socket.
         """
         self.multicast_group = multicast_group
-        
+
         # Create the datagram socket
         # AF_INET represent the address (and protocol) family ipv4. 
         # SOCK_DGRAM sets the socket to use UDP.
@@ -46,6 +47,7 @@ class SocketMulticastSender(socket.socket):
 
         # Send message to all clients listening on the multicast_group
         self.sendto(message.encode('UTF-8'), self.multicast_group)
+
 
 if __name__ == '__main__':
     sock = SocketMulticastSender(multicast_group=('224.3.29.71', 10000), timeout=0.2)
