@@ -3,6 +3,7 @@ from find_location import MultitagPositioning
 from socket_multicast_sender import SocketMulticastSender
 from package_formatter import PackageFormatter
 from mock_find_location import MockMultiTagPositioning
+from goalzone_generator import GoalzoneGenerator
 
 
 class Server:
@@ -18,6 +19,8 @@ class Server:
         self.setup = Setup()
         self.setup.start()
         self.multicast_sender = SocketMulticastSender(('224.3.29.71', 10000), 0.2)
+        self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
+
         if should_mock:
             self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
         else:
@@ -30,6 +33,13 @@ class Server:
         while True:
             self.update_ball_position()
             self.update_player_positions()
+
+            # check if a goal has been scored and then broadcast newly generated goalzones
+            ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
+            if self.goalzone_generator.goal_scored((ball_pos.x, ball_pos.y)):
+                self.goalzone_generator.generate_random_goalzones()
+                self.send_goalzone_positions()
+            
             self.time_stamp = (self.time_stamp + 1) % 256	# %256 because max value for the time stamp is 255
 
     def update_ball_position(self):
@@ -54,7 +64,18 @@ class Server:
             message = self.formatter.format_anchor_position(self.time_stamp, i, anchor.x, anchor.y)
             self.multicast_sender.send(message)
 
+    def send_goalzone_positions(self):
+        """ Broadcasts the goalzone positions"""
+        # TODO: Receive acknowledgement from clients that new goalzones have been received
+        blue_team_message = self.formatter.format_goal_position(self.time_stamp, 0, int(self.goalzone_generator.center_of_blue_goal[0]), 
+                                                                int(self.goalzone_generator.center_of_blue_goal[1]))
+        red_team_message = self.formatter.format_goal_position(self.time_stamp, 1, int(self.goalzone_generator.center_of_red_goal[0]), 
+                                                                int(self.goalzone_generator.center_of_red_goal[1]))
+        self.multicast_sender.send(blue_team_message)
+        self.multicast_sender.send(red_team_message)
 
 if __name__ == "__main__":
     server = Server(True)
+    # Initial goalzones are broadcasted to the clients
+    server.send_goalzone_positions()
     server.run()

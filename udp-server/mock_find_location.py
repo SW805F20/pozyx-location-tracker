@@ -14,7 +14,7 @@ class MockMultiTagPositioning:
 			tag_ids[4]: TagPosition(700, 200),
 		}
 
-	def getPosition(self, tag_id):
+	def get_position(self, tag_id):
 		"""
 		Get the position of a tag and increments it's position with 1
 		Parameters:

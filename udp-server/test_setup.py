@@ -198,7 +198,7 @@ def test_verify_anchors_trapezoid():
     assert result[3] == anchor2
 
 
-def test_verify_anchors_trapezoid():
+def test_verify_anchors_trapezoid_2():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
     anchor1 = Anchor("1", "0", "10", "10")
@@ -213,7 +213,7 @@ def test_verify_anchors_trapezoid():
     assert result[3] == anchor3
 
 
-def test_verify_anchors_trapezoid_2():
+def test_verify_anchors_trapezoid_3():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
     anchor1 = Anchor("1", "0", "10", "10")
@@ -228,7 +228,7 @@ def test_verify_anchors_trapezoid_2():
     assert result[3] == anchor3
 
 
-def test_verify_anchors_trapezoid_2():
+def test_verify_anchors_trapezoid_4():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
     anchor1 = Anchor("1", "0", "10", "10")
@@ -243,7 +243,7 @@ def test_verify_anchors_trapezoid_2():
     assert result[3] == anchor3
 
 
-def test_verify_anchors_trapezoid_3():
+def test_verify_anchors_trapezoid_5():
     setup = Setup()
     anchor0 = Anchor("0", "0", "0", "15")
     anchor1 = Anchor("1", "0", "10", "10")

@@ -51,8 +51,7 @@ class Setup:
                 coordinates = string.split()
                 if self.verify_anchor_coordinates(coordinates) and self.is_hex(anchor_id):
                     break
-
-        self.anchors.append(Anchor(coordinates[0], coordinates[1], coordinates[2]))
+            self.anchors.append(Anchor(anchor_id, coordinates[0], coordinates[1], coordinates[2]))
         self.anchors = self.sort_anchors()
 
     def sort_anchors(self):

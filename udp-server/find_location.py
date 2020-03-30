@@ -54,7 +54,7 @@ class MultitagPositioning(object):
         self.pozyx = PozyxSerial(serial_port)
         self.setup()
 
-    def getPosition(self, tag_id):
+    def get_position(self, tag_id):
         """
         Gets the position of a tag
         Parameters:
