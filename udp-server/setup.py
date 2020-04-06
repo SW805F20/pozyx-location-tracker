@@ -1,13 +1,16 @@
 import re
-
+import copy
 
 class Setup:
     amount_of_players = 0
     player_tags = []
     ball_tag = ""
     anchors = []
+    teams = []
+
     # Dependent on the unit of measurement used. This is assumed to be millimeters
     ANCHOR_COORDINATE_LIMIT = 100000
+    TEAM_NAMES = ["Red", "Blue"]
 
     def start(self):
         self.prompt_amount_of_players()
@@ -94,7 +97,11 @@ class Setup:
 		"""
         for i in range(1, self.amount_of_players + 1):
             while True:
-                player_tag = input("Player {}'s tag: ".format(i))
+                if i < self.amount_of_players // 2 + 1:
+                    player_tag = input("[{}] Player {}'s tag: ".format(self.TEAM_NAMES[0], i))
+                else:
+                    player_tag = input("[{}] Player {}'s tag: "
+                                       .format(self.TEAM_NAMES[1], i - (self.amount_of_players // 2)))
                 if self.is_hex(player_tag):
                     self.player_tags.append(player_tag)
                     break
@@ -150,6 +157,24 @@ class Setup:
 
         return True
 
+    def assign_teams(self):
+        """
+        Function that assigns players into teams by taking the first players inputed in player_tags and assigns them to
+        the first team, and the rest to the following teams.
+
+        """
+        number_of_teams = len(self.TEAM_NAMES)
+        players = copy.copy(self.player_tags)        # copy.copy copies the list into a new variable
+        size_of_teams = int(self.amount_of_players / number_of_teams + self.amount_of_players % number_of_teams)
+        if self.amount_of_players != 0:
+            for i in range(0, number_of_teams):
+                team = []
+                for k in range(0, size_of_teams):
+                    if len(players) == 0:
+                        break
+                    team.append(players[0])
+                    players.remove(players[0])
+                self.teams.append(Team(self.TEAM_NAMES[i], team, 0))    # The 0 appended into teams is the goal score.
 
 class Anchor:
     def __init__(self, anchor_id, x, y, z):
@@ -159,9 +184,17 @@ class Anchor:
         self.z = z
 
 
+class Team:
+    def __init__(self, team_color, players, score):
+        self.team_color = team_color
+        self.players = players
+        self.score = score
+
+
 if __name__ == "__main__":
     setup = Setup()
     setup.prompt_amount_of_players()
     setup.prompt_player_tags()
+    setup.assign_teams()
     setup.prompt_anchors()
     setup.prompt_ball_tag()

@@ -1,5 +1,5 @@
-from setup import Setup, Anchor
-
+from setup import Setup, Anchor, Team
+import pytest
 
 # is_int tests
 def test_is_int_int_input():
@@ -256,3 +256,122 @@ def test_verify_anchors_trapezoid_5():
     assert result[1] == anchor1
     assert result[2] == anchor2
     assert result[3] == anchor3
+
+
+def test_assign_teams_color():
+    setup = Setup()
+    setup.amount_of_players = 4
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    team1 = Team("Red", [player1, player2], 0)
+    team2 = Team("Blue", [player3, player4], 0)
+    setup.player_tags = [player1, player2, player3, player4]
+    setup.assign_teams()
+    result = setup.teams
+    assert result[0].team_color == team1.team_color
+    assert result[1].team_color == team2.team_color
+
+
+def test_assign_teams_players():
+    setup = Setup()
+    setup.amount_of_players = 4
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    team1 = Team("Red", [player1, player2], 0)
+    team2 = Team("Blue", [player3, player4], 0)
+    setup.player_tags = [player1, player2, player3, player4]
+    setup.assign_teams()
+    result = setup.teams
+    assert result[0].players == team1.players
+    assert result[1].players == team2.players
+
+
+def test_assign_teams_score():
+    setup = Setup()
+    setup.amount_of_players = 4
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    setup.player_tags = [player1, player2, player3, player4]
+    setup.assign_teams()
+    result = setup.teams
+    assert result[0].score == 0
+    assert result[1].score == 0
+
+
+def test_assign_teams_zero_players():
+    setup = Setup()
+    setup.teams = []
+    setup.assign_teams()
+    result = setup.teams
+    assert len(result) == 0
+
+
+def test_assign_teams_three_players():
+    setup = Setup()
+    setup.amount_of_players = 3
+    setup.teams = []
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    setup.player_tags = [player1, player2, player3]
+    setup.assign_teams()
+    result = setup.teams
+    assert len(result[0].players) == 2
+    assert len(result[1].players) == 1
+
+
+def test_assign_teams_five_players():
+    setup = Setup()
+    setup.amount_of_players = 5
+    setup.teams = []
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    player5 = 0x0005
+    setup.player_tags = [player1, player2, player3, player4, player5]
+    setup.assign_teams()
+    result = setup.teams
+    assert len(result[0].players) == 3
+    assert len(result[1].players) == 2
+
+
+def test_assign_teams_six_players():
+    setup = Setup()
+    setup.amount_of_players = 6
+    setup.teams = []
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    player5 = 0x0005
+    player6 = 0x0006
+    setup.player_tags = [player1, player2, player3, player4, player5, player6]
+    setup.assign_teams()
+    result = setup.teams
+    assert len(result[0].players) == 3
+    assert len(result[1].players) == 3
+
+
+def test_assign_teams_seven_players():
+    setup = Setup()
+    setup.amount_of_players = 7
+    setup.teams = []
+    player1 = 0x0001
+    player2 = 0x0002
+    player3 = 0x0003
+    player4 = 0x0004
+    player5 = 0x0005
+    player6 = 0x0006
+    player7 = 0x0007
+    setup.player_tags = [player1, player2, player3, player4, player5, player6, player7]
+    setup.assign_teams()
+    result = setup.teams
+    assert len(result[0].players) == 4
+    assert len(result[1].players) == 3
