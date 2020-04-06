@@ -43,12 +43,92 @@ class TestGoalGenerator(unittest.TestCase):
         assert goalzone_gen.center_of_blue_goal == (19, 5)
         assert goalzone_gen.center_of_red_goal == (1, 5)
     
-    def test_goal_scored_should_return_true(self):
+    def test_goal_scored_red_should_return_true(self):
         goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
         ball_position = (19.5, 5.5)
-        assert goalzone_gen.goal_scored(ball_position) is True
+        assert goalzone_gen.goal_scored_red(ball_position) is True
 
-    def test_goal_scored_should_return_false(self):
+    def test_goal_scored_red_should_return_false(self):
         goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
         ball_position = (10, 10)
-        assert goalzone_gen.goal_scored(ball_position) is False
+        assert goalzone_gen.goal_scored_red(ball_position) is False
+
+    def test_goal_scored_blue_should_return_true(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (0.5, 5.5)
+        assert goalzone_gen.goal_scored_blue(ball_position) is True
+
+    def test_goal_scored_blue_should_return_false(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (10, 10)
+        assert goalzone_gen.goal_scored_blue(ball_position) is False
+
+    def test_accumulate_goals_blue_should_return_true(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (0.5, 5.5)
+        accumulation_range = range(0, 3)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_blue(ball_position)
+
+        assert goalzone_gen.accumulate_goals_scored_blue(ball_position) is True
+
+    def test_accumulate_goals_red_should_return_true(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (19.5, 5.5)
+        accumulation_range = range(0, 3)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_red(ball_position)
+
+        assert goalzone_gen.accumulate_goals_scored_red(ball_position) is True
+
+    def test_accumulate_goals_blue_should_return_false(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (0.5, 5.5)
+        accumulation_range = range(0, 2)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_blue(ball_position)
+
+        assert goalzone_gen.accumulate_goals_scored_blue(ball_position) is False
+
+    def test_accumulate_goals_red_should_return_false(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (19.5, 5.5)
+        accumulation_range = range(0, 2)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_red(ball_position)
+
+        assert goalzone_gen.accumulate_goals_scored_red(ball_position) is False
+
+    def test_accumulate_goals_should_reset_blue(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (0.5, 5.5)
+        accumulation_range = range(0, 2)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_blue(ball_position)
+
+        assert goalzone_gen.accumulated_goals == 2
+
+        ball_position = (10, 10)
+        goalzone_gen.accumulate_goals_scored_blue(ball_position)
+
+        assert goalzone_gen.accumulated_goals == 0
+
+    def test_accumulate_goals_should_reset_red(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        ball_position = (19.5, 5.5)
+        accumulation_range = range(0, 2)
+        for _ in accumulation_range:
+            goalzone_gen.accumulate_goals_scored_red(ball_position)
+
+        assert goalzone_gen.accumulated_goals == 2
+
+        ball_position = (10, 10)
+        goalzone_gen.accumulate_goals_scored_red(ball_position)
+
+        assert goalzone_gen.accumulated_goals == 0
+
+    def test_accumulate_goals_should_increment(self):
+        goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
+        goalzone_gen.goal_accumulator()
+
+        assert goalzone_gen.accumulated_goals == 1

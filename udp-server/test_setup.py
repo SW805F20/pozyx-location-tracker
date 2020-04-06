@@ -265,8 +265,8 @@ def test_assign_teams_color():
     player2 = 0x0002
     player3 = 0x0003
     player4 = 0x0004
-    team1 = Team("Red", [player1, player2], 0)
-    team2 = Team("Blue", [player3, player4], 0)
+    team1 = Team("Blue", [player1, player2], 0)
+    team2 = Team("Red", [player3, player4], 0)
     setup.player_tags = [player1, player2, player3, player4]
     setup.assign_teams()
     result = setup.teams
@@ -281,8 +281,8 @@ def test_assign_teams_players():
     player2 = 0x0002
     player3 = 0x0003
     player4 = 0x0004
-    team1 = Team("Red", [player1, player2], 0)
-    team2 = Team("Blue", [player3, player4], 0)
+    team1 = Team("Blue", [player1, player2], 0)
+    team2 = Team("Red", [player3, player4], 0)
     setup.player_tags = [player1, player2, player3, player4]
     setup.assign_teams()
     result = setup.teams

@@ -10,7 +10,7 @@ class Setup:
 
     # Dependent on the unit of measurement used. This is assumed to be millimeters
     ANCHOR_COORDINATE_LIMIT = 100000
-    TEAM_NAMES = ["Red", "Blue"]
+    TEAM_NAMES = ["Blue", "Red"]
 
     def start(self):
         self.prompt_amount_of_players()

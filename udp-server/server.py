@@ -34,13 +34,24 @@ class Server:
             self.update_ball_position()
             self.update_player_positions()
 
-            # check if a goal has been scored and then broadcast newly generated goalzones
+            # Accumulate consecutive goals and then broadcast newly generated goalzones
             ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
-            if self.goalzone_generator.goal_scored((ball_pos.x, ball_pos.y)):
-                self.goalzone_generator.generate_random_goalzones()
-                self.send_goalzone_positions()
-            
+            if self.goalzone_generator.accumulate_goals_scored_blue((ball_pos.x, ball_pos.y)):
+                self.setup.teams[0].score += 1
+                self.goal_scored_procedure()
+
+            if self.goalzone_generator.accumulate_goals_scored_red((ball_pos.x, ball_pos.y)):
+                self.setup.teams[1].score += 1
+                self.goal_scored_procedure()
+
+
             self.time_stamp = (self.time_stamp + 1) % 256	# %256 because max value for the time stamp is 255
+
+    def goal_scored_procedure(self):
+        """Calls the necessary functions when a goal has been scored"""
+        self.goalzone_generator.generate_random_goalzones()
+        self.send_goalzone_positions()
+        self.send_goal_scored()
 
     def update_ball_position(self):
         """Broadcasts the updated ball position"""
@@ -73,6 +84,12 @@ class Server:
                                                                 int(self.goalzone_generator.center_of_red_goal[1]))
         self.multicast_sender.send(blue_team_message)
         self.multicast_sender.send(red_team_message)
+
+    def send_goal_scored(self):
+        """Broadcasts that a goal was scored for either team"""
+        goal_message = self.formatter.format_goal_scored(self.time_stamp, self.setup.teams[0].score, self.setup[1].score)
+        self.multicast_sender.send(goal_message)
+
 
 if __name__ == "__main__":
     server = Server(True)

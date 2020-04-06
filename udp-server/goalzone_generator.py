@@ -4,6 +4,8 @@ import random
 
 class GoalzoneGenerator:
     GOAL_LENGTH_PERCENTAGE_LIMIT = 30
+    # When accumulating sequential goals this constant defines the length of the required sequence.
+    ACCUMULATED_GOALS_NEEDED = 4
 
     def __init__(self, anchor_list, goal_length_percentage):
         """ 
@@ -47,6 +49,9 @@ class GoalzoneGenerator:
         
         # Gets the initial goal zones
         self.center_of_blue_goal, self.center_of_red_goal = self.calculate_initial_goal_centers()
+
+        # To avoid outliers several goals should be counted in a sequence. This is the accumulator for this.
+        self.accumulated_goals = 0
 
     def set_goal_length_percentage(self, goal_length_percentage):
         """ 
@@ -137,9 +142,9 @@ class GoalzoneGenerator:
         self.center_of_blue_goal = (random_x, random_y)
         self.center_of_red_goal = (self.max_x + self.min_x - random_x, self.max_y + self.min_y - random_y)
 
-    def goal_scored(self, ball_position):
+    def goal_scored_red(self, ball_position):
         """
-        Returns true if a team has scored
+        Returns true if red team has scored
         
         Parameters: 
             ball_position ((int, int)): tuple with the x and y coordinate of the ball.
@@ -150,10 +155,62 @@ class GoalzoneGenerator:
             if (self.center_of_blue_goal[1] - self.goal_zone_middle_offset) < ball_position[1] < (self.center_of_blue_goal[1] + self.goal_zone_middle_offset):
                 return True
 
-        # check x position for red goal       
+        return False
+
+    def goal_scored_blue(self, ball_position):
+        """
+            Returns true if blue team has scored
+
+            Parameters:
+                ball_position ((int, int)): tuple with the x and y coordinate of the ball.
+            """
+        # check x position for red goal
         if (self.center_of_red_goal[0] - self.goal_zone_middle_offset) < ball_position[0] < (self.center_of_red_goal[0] + self.goal_zone_middle_offset):
             # check y position for red goal
             if (self.center_of_red_goal[1] - self.goal_zone_middle_offset) < ball_position[1] < (self.center_of_red_goal[1] + self.goal_zone_middle_offset):
                 return True
 
         return False
+
+    def accumulate_goals_scored_red(self, ball_position):
+        """
+        Checks if red team has scored and accumulates a counter.
+        Returns true if the team has scored several times in a row, to prevent an outlier point from being counted.
+
+        Parameters:
+            ball_position ((int, int)): tuple with the x and y coordinate of the ball.
+        """
+        if self.goal_scored_red(ball_position):
+            if self.goal_accumulator():
+                return True
+        else:
+            if self.accumulated_goals != 0:
+                self.accumulated_goals = 0
+
+        return False
+
+    def accumulate_goals_scored_blue(self, ball_position):
+        """
+        Checks if blue team has scored and accumulates a counter.
+        Returns true if the team has scored several times in a row, to prevent an outlier point from being counted.
+
+        Parameters:
+            ball_position ((int, int)): tuple with the x and y coordinate of the ball.
+        """
+        if self.goal_scored_blue(ball_position):
+            if self.goal_accumulator():
+                return True
+        else:
+            if self.accumulated_goals != 0:
+                self.accumulated_goals = 0
+
+        return False
+
+    def goal_accumulator(self):
+        self.accumulated_goals += 1
+        if self.accumulated_goals == self.ACCUMULATED_GOALS_NEEDED:
+            self.accumulated_goals = 0
+            return True
+
+        return False
+
