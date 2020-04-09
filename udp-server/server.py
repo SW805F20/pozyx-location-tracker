@@ -4,6 +4,7 @@ from socket_multicast_sender import SocketMulticastSender
 from package_formatter import PackageFormatter
 from mock_find_location import MockMultiTagPositioning
 from goalzone_generator import GoalzoneGenerator
+import asyncio
 
 
 class Server:
@@ -28,39 +29,49 @@ class Server:
                                                              self.setup.anchors)
         self.formatter = PackageFormatter()
 
-    def run(self):
+    async def run(self):
         """Function that loops and continuously broadcasts the position of all tags"""
         while True:
-            self.update_ball_position()
-            self.update_player_positions()
+            update_ball_pos_task = asyncio.create_task(self.update_ball_position())
+            update_player_pos_task = asyncio.create_task(self.update_player_positions())
+            update_goal_zone_task = asyncio.create_task(self.update_goal_zone())
 
-            # Accumulate consecutive goals and then broadcast newly generated goalzones
-            ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
-            if self.goalzone_generator.accumulate_goals_scored_blue((ball_pos.x, ball_pos.y)):
-                self.setup.teams[0].score += 1
-                self.goal_scored_procedure()
+            await update_ball_pos_task
+            await update_player_pos_task
+            await update_goal_zone_task
 
-            if self.goalzone_generator.accumulate_goals_scored_red((ball_pos.x, ball_pos.y)):
-                self.setup.teams[1].score += 1
-                self.goal_scored_procedure()
+            # %256 because max value for the time stamp is 255
+            self.time_stamp = (self.time_stamp + 1) % 256
 
+    async def update_goal_zone(self):
+        """ Updates the goal zone if ball is inside goal zone """
 
-            self.time_stamp = (self.time_stamp + 1) % 256	# %256 because max value for the time stamp is 255
+        # Accumulate consecutive goals and then broadcast newly generated goalzones
+        ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
+        if self.goalzone_generator.accumulate_goals_scored_blue((ball_pos.x, ball_pos.y)):
+            self.setup.teams[0].score += 1
+            goal_scored_task = await asyncio.create_task(self.goal_scored_procedure())
+            await goal_scored_task
 
-    def goal_scored_procedure(self):
+        if self.goalzone_generator.accumulate_goals_scored_red((ball_pos.x, ball_pos.y)):
+            self.setup.teams[1].score += 1
+            goal_scored_task = await asyncio.create_task(self.goal_scored_procedure())
+            await goal_scored_task
+
+    async def goal_scored_procedure(self):
         """Calls the necessary functions when a goal has been scored"""
         self.goalzone_generator.generate_random_goalzones()
-        self.send_goalzone_positions()
-        self.send_goal_scored()
+        await asyncio.create_task(self.send_goalzone_positions())
+        await asyncio.create_task(self.send_goal_scored())
 
-    def update_ball_position(self):
+    async def update_ball_position(self):
         """Broadcasts the updated ball position"""
         ball_tag = self.setup.ball_tag
         position = self.multi_tag_positioning.get_position(ball_tag)
         message = self.formatter.format_player_position(self.time_stamp, 0, position.x, position.y)
         self.multicast_sender.send(message)
 
-    def update_player_positions(self):
+    async def update_player_positions(self):
         """Broadcasts updated positions for all players"""
         for i in range(0, self.setup.amount_of_players):
             player_tag = self.setup.player_tags[i]
@@ -75,9 +86,8 @@ class Server:
             message = self.formatter.format_anchor_position(self.time_stamp, i, anchor.x, anchor.y)
             self.multicast_sender.send(message)
 
-    def send_goalzone_positions(self):
+    async def send_goalzone_positions(self):
         """ Broadcasts the goalzone positions"""
-        # TODO: Receive acknowledgement from clients that new goalzones have been received
         blue_team_message = self.formatter.format_goal_position(self.time_stamp, 0, int(self.goalzone_generator.center_of_blue_goal[0]), 
                                                                 int(self.goalzone_generator.center_of_blue_goal[1]))
         red_team_message = self.formatter.format_goal_position(self.time_stamp, 1, int(self.goalzone_generator.center_of_red_goal[0]), 
@@ -85,7 +95,7 @@ class Server:
         self.multicast_sender.send(blue_team_message)
         self.multicast_sender.send(red_team_message)
 
-    def send_goal_scored(self):
+    async def send_goal_scored(self):
         """Broadcasts that a goal was scored for either team"""
         goal_message = self.formatter.format_goal_scored(self.time_stamp, self.setup.teams[0].score, self.setup[1].score)
         self.multicast_sender.send(goal_message)
@@ -95,4 +105,4 @@ if __name__ == "__main__":
     server = Server(True)
     # Initial goalzones are broadcasted to the clients
     server.send_goalzone_positions()
-    server.run()
+    asyncio.run(server.run())

@@ -13,19 +13,10 @@ parameters and upload this sketch. Watch the coordinates change as
 you move your device around!
 
 """
-from time import sleep
-
-from pypozyx import (PozyxConstants, POZYX_SUCCESS,
+from pypozyx import (PozyxConstants,
                      PozyxRegisters, version, PozyxSerial,
-                     get_first_pozyx_serial_port, SingleRegister)
-from pythonosc.udp_client import SimpleUDPClient
-
-from pypozyx.tools.version_check import perform_latest_version_check
-
+                     get_first_pozyx_serial_port)
 from pypozyx.structures.device import Coordinates, DeviceCoordinates
-
-from datetime import datetime
-
 
 class MultitagPositioning(object):
     """Continuously performs multitag positioning"""

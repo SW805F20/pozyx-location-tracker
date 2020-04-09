@@ -13,10 +13,30 @@ class Setup:
     TEAM_NAMES = ["Blue", "Red"]
 
     def start(self):
-        self.prompt_amount_of_players()
-        self.prompt_player_tags()
-        self.prompt_anchors()
-        self.prompt_ball_tag()
+        mock = self.prompt_mock_data()
+
+        if not mock:
+            self.prompt_amount_of_players()
+            self.prompt_player_tags()
+            self.assign_teams()
+            self.prompt_anchors()
+            self.prompt_ball_tag()
+
+    def prompt_mock_data(self):
+        use_mock_data = input("Use mock data? (y/n) ")
+        if use_mock_data == "y":
+            self.amount_of_players = 4
+            self.ball_tag = 0x0
+            self.anchors.append(Anchor(0x1, 1, 0, 0))
+            self.anchors.append(Anchor(0x2, 1, 1, 0))
+            self.anchors.append(Anchor(0x3, 1, 1, 0))
+            self.anchors.append(Anchor(0x4, 0, 1, 0))
+            self.player_tags.append(0x1)
+            self.player_tags.append(0x2)
+            self.player_tags.append(0x3)
+            self.player_tags.append(0x4)
+            return True
+        return False
 
     def prompt_amount_of_players(self):
         """
@@ -193,8 +213,4 @@ class Team:
 
 if __name__ == "__main__":
     setup = Setup()
-    setup.prompt_amount_of_players()
-    setup.prompt_player_tags()
-    setup.assign_teams()
-    setup.prompt_anchors()
-    setup.prompt_ball_tag()
+    setup.start()
