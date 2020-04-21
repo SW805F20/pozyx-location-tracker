@@ -1,16 +1,22 @@
 class PackageFormatter:
     """formats data to hexadecimal packages"""
 
-    def format_anchor_position(self, time_stamp, tag_id, pos_x, pos_y):
+    def format_anchor_position(self, tag_id, pos_x, pos_y, package_type):
         """
 		formats inputs to : 0xYYYYXXXXAATTII
 		Parameters:
-            time_stamp (int): timestamp of the package (T)
 			tag_id (int): id of the anchor (A)
 			pos_x (int): x coordinate of the anchor (X)
 			pos_y (int): y coordinate of the anchor (Y)
+            package_type (int): Type of the package that is being formatted (I)
 		"""
-        package = self.format_position(pos_y, pos_x, tag_id, time_stamp, 0x0)
+        package = pos_y 					# package = 0xYYYY
+        package = package << 16				# package = 0xYYYY0000
+        package = package | pos_x			# package = 0xYYYYXXXX
+        package = package << 8	    		# package = 0xYYYYXXXX00
+        package = package | tag_id			# package = 0xYYYYXXXXAA
+        package = package << 8				# package = 0xYYYYXXXXPP00
+        package = package | package_type    # package = 0xYYYYXXXXPPII
         return hex(package)
 
     def format_player_position(self, time_stamp, tag_id, pos_x, pos_y):
@@ -74,7 +80,6 @@ class PackageFormatter:
         package = package << 8				# package = 0xYYYYXXXXPPTT00
         package = package | package_type    # package = 0xYYYYXXXXPPTTII
         return package
-
 
 if __name__ == "__main__":
     formatter = PackageFormatter()

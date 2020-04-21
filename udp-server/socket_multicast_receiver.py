@@ -25,7 +25,7 @@ class SocketMulticastReceiver(socket.socket):
         group = socket.inet_aton(multicast_group)
 
         # struct.pack() returns the object as bytes
-        # 4sL is the format of the packing. 4s meaning the first is a string of 4 chars. L meaning it is follewed by an unsigned long
+        # 4sL is the format of the packing. 4s meaning the first is a string of 4 chars. L meaning it is followed by an unsigned long
         # INADDR_ANY binds the socket to all available local interfaces
         mreq = struct.pack('4sL', group, socket.INADDR_ANY)
 

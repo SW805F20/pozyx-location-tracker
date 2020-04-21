@@ -46,7 +46,7 @@ def test_formatPosition_packageType_zero():
 def test_formatAnchorPoisition_sets_correct_packageId():
     formatter = PackageFormatter()
     package = formatter.format_anchor_position(1, 1, 10000, 10000)
-    assert package == '0x27102710010100'
+    assert package == '0x271000012710'
 
 
 def test_formatPlayerPosition_sets_correct_packageId():

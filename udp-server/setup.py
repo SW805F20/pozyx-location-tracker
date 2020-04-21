@@ -2,20 +2,22 @@ import re
 import copy
 
 class Setup:
-    amount_of_players = 0
-    player_tags = []
-    ball_tag = ""
-    anchors = []
-    teams = []
+    def __init__(self):
+        self.amount_of_players = 0
+        self.player_tags = []
+        self.ball_tag = ""
+        self.anchors = []
+        self.teams = []
 
     # Dependent on the unit of measurement used. This is assumed to be millimeters
     ANCHOR_COORDINATE_LIMIT = 100000
     TEAM_NAMES = ["Blue", "Red"]
 
     def start(self):
-        mock = self.prompt_mock_data()
+        self.mock = self.prompt_mock_data()
+        self.debug_mode = self.prompt_debug_mode()
 
-        if not mock:
+        if not self.mock:
             self.prompt_amount_of_players()
             self.prompt_player_tags()
             self.assign_teams()
@@ -27,14 +29,20 @@ class Setup:
         if use_mock_data == "y":
             self.amount_of_players = 4
             self.ball_tag = 0x0
-            self.anchors.append(Anchor(0x1, 1, 0, 0))
-            self.anchors.append(Anchor(0x2, 1, 1, 0))
+            self.anchors.append(Anchor(0x1, 0, 0, 0))
+            self.anchors.append(Anchor(0x2, 0, 1, 0))
             self.anchors.append(Anchor(0x3, 1, 1, 0))
-            self.anchors.append(Anchor(0x4, 0, 1, 0))
+            self.anchors.append(Anchor(0x4, 1, 0, 0))
             self.player_tags.append(0x1)
             self.player_tags.append(0x2)
             self.player_tags.append(0x3)
             self.player_tags.append(0x4)
+            return True
+        return False
+
+    def prompt_debug_mode(self):
+        use_debug_mode = input("Use debug mode? (y/n) ")
+        if use_debug_mode == "y":
             return True
         return False
 
@@ -73,8 +81,8 @@ class Setup:
                 string = input("Position of anchor {}: ".format(i))
                 coordinates = string.split()
                 if self.verify_anchor_coordinates(coordinates) and self.is_hex(anchor_id):
+                    self.anchors.append(Anchor(anchor_id, coordinates[0], coordinates[1], coordinates[2]))
                     break
-            self.anchors.append(Anchor(anchor_id, coordinates[0], coordinates[1], coordinates[2]))
         self.anchors = self.sort_anchors()
 
     def sort_anchors(self):
@@ -199,9 +207,9 @@ class Setup:
 class Anchor:
     def __init__(self, anchor_id, x, y, z):
         self.id = anchor_id
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = int(x)
+        self.y = int(y)
+        self.z = int(z)
 
 
 class Team:
