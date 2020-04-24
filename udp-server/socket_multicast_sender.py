@@ -38,15 +38,14 @@ class SocketMulticastSender(socket.socket):
     def send(self, message):
         """ 
         Function for sending a message to the multicast group
-  
         Parameters: 
-            message (string): The string to send to the multicast group.
+            message (bytes): the bytes to send to the multicast group
         """
         # Send data to the multicast group
         print('sending {!r}'.format(message))
 
         # Send message to all clients listening on the multicast_group
-        self.sendto(message.encode('UTF-8'), self.multicast_group)
+        self.sendto(message, self.multicast_group)
 
 
 if __name__ == '__main__':

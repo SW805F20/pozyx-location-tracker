@@ -1,7 +1,7 @@
 class PackageFormatter:
     """formats data to hexadecimal packages"""
 
-    def format_anchor_position(self, tag_id, pos_x, pos_y, package_type):
+    def format_anchor_position(self, tag_id, pos_x, pos_y):
         """
 		formats inputs to : 0xYYYYXXXXAATTII
 		Parameters:
@@ -16,8 +16,27 @@ class PackageFormatter:
         package = package << 8	    		# package = 0xYYYYXXXX00
         package = package | tag_id			# package = 0xYYYYXXXXAA
         package = package << 8				# package = 0xYYYYXXXXPP00
-        package = package | package_type    # package = 0xYYYYXXXXPPII
-        return hex(package)
+        package = package | 0x1    # package = 0xYYYYXXXXPPII
+
+        hex_package = hex(package)
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
+
+    def format_player_tag(self, player_id, tag_id):
+        """ formats input to: 0xPPTTTTII 
+            Parameters:
+                player_id (int): id of the player (P)
+                tag:id (int): id of the tag that the player will be using (T)
+                package_type (int): Type of the package that is being formatted (I)
+        """
+        package = player_id 				# package = 0xPP
+        package = package << 16				# package = 0xPP0000
+        package = package | tag_id			# package = 0xPPTTTT
+        package = package << 8    		    # package = 0xPPTTTT00
+        package = package | 0x2    # package = 0xPPTTTTII
+        
+        hex_package = hex(package)
+
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
 
     def format_player_position(self, time_stamp, tag_id, pos_x, pos_y):
         """
@@ -28,26 +47,33 @@ class PackageFormatter:
 			pos_x (int): x coordinate of the player tag (X)
 			pos_y (int): y coordinate of the player tag (Y)
 		"""
-        package = self.format_position(pos_y, pos_x, tag_id, time_stamp, 0x1)
-        return hex(package)
+        return self.format_position(pos_y, pos_x, tag_id, time_stamp, 0x0)
 
-    def format_goal_position(self, time_stamp, team_id, pos_x, pos_y):
+
+    def format_goal_position(self, team_id, pos_x, pos_y):
         """
 		formats inputs to : 0xYYYYXXXXGGTTII
 		Parameters:
-            time_stamp (int): timestamp of the package (T)
 			team_id (int): teamId that the goal belongs to (G)
 			pos_x (int): x coordinate of the goal corner (X)
 			pos_y (int): y coordinate of the goal corner (Y)
 		"""
-        package = self.format_position(pos_y, pos_x, team_id, time_stamp, 0x2)
-        return hex(package)
+        package = pos_y 					# package = 0xYYYY
+        package = package << 16				# package = 0xYYYY0000
+        package = package | pos_x			# package = 0xYYYYXXXX
+        package = package << 8	    		# package = 0xYYYYXXXX00
+        package = package | team_id			# package = 0xYYYYXXXXPP
+        package = package << 8				# package = 0xYYYYXXXXPP00
+        package = package | 0x5             # package = 0xYYYYXXXXPPII
 
-    def format_goal_scored(self, time_stamp, team_0_score, team_1_score):
+        hex_package = hex(package)
+
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
+
+    def format_goal_scored(self, team_0_score, team_1_score):
         """
 		formats inputs to : 0x1100TTII
 		Parameters:
-            timestamp (int): timestamp of the package (T)
 			team_0_score (int): score of team 0 (0)
 			team_1_score (int): score of team 1 (1)
 		"""
@@ -55,10 +81,11 @@ class PackageFormatter:
         package = package << 8				# package = 0x1100	
         package = package | team_0_score	# package = 0x1100
         package = package << 8				# package = 0x110000
-        package = package | time_stamp		# package = 0x1100TT
-        package = package << 8				# package = 0x1100TT00
-        package = package | 0x3				# package = 0x1100TTII
-        return hex(package)
+        package = package | 0x4				# package = 0x1100II
+
+        hex_package = hex(package)
+
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
 
     def format_position(self, pos_y, pos_x, tag_id, time_stamp, package_type):
         """
@@ -79,7 +106,11 @@ class PackageFormatter:
         package = package | time_stamp		# package = 0xYYYYXXXXPPTT
         package = package << 8				# package = 0xYYYYXXXXPPTT00
         package = package | package_type    # package = 0xYYYYXXXXPPTTII
-        return package
+        
+        
+        return hex(package).encode('UTF-8')
+
+
 
 if __name__ == "__main__":
     formatter = PackageFormatter()

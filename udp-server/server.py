@@ -6,9 +6,11 @@ from tcp_socket import TCPSocket
 from package_formatter import PackageFormatter
 from mock_find_location import MockMultiTagPositioning
 from goalzone_generator import GoalzoneGenerator
+from player_connection import PlayerConnection
 import asyncio
 import threading
 import socket
+import copy
 
 
 class Server:
@@ -25,6 +27,7 @@ class Server:
         self.setup.start()
         self.multicast_sender = SocketMulticastSender(('224.3.29.71', 10000), 1)
         self.tcp_socket = TCPSocket(tcp_port=10000)
+        self.player_connections = []
         print('Server running on IP', self.tcp_socket.tcp_ip)
         self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
 
@@ -37,29 +40,29 @@ class Server:
 
 
     def setup_game(self):
-        """Function that handles the setup for the game """
+        """Function that handles the setup for the game by sending player tags and anchor positions"""
         self.tcp_socket.listen(self.setup.amount_of_players)
-        connections = []
+        player_tags_copy = copy.copy(self.setup.player_tags)
 
-        while len(connections) < self.setup.amount_of_players:
+        while len(self.player_connections) < self.setup.amount_of_players:
             if self.setup.debug_mode:
                 print('Waiting for connections')
             conn, addr = self.tcp_socket.accept()
-            connections.append(addr)
-    
+            
             if self.setup.debug_mode:
                 print('connection from', addr)
 
             # The thread to handle the client connection is created
             client_handler = threading.Thread(
                 # The function to execute on the thread
-                target=self.send_anchor_positions_to_client,
+                target=self.send_setup_data,
                 # The arguments passed to the function
-                args=(conn, addr, connections)
+                args=(conn, addr, player_tags_copy)
             )
             # The client is handled on a thread to allow the server to go 
             # back and wait for connection as data is sent to the first client
             client_handler.start()
+
 
     async def run(self):
         """Function that loops and continuously broadcasts the position of all tags"""
@@ -105,48 +108,79 @@ class Server:
 
     async def update_player_positions(self):
         """Broadcasts updated positions for all players"""
-        for i in range(0, self.setup.amount_of_players):
-            player_tag = self.setup.player_tags[i]
-            position = self.multi_tag_positioning.get_position(player_tag)
-            message = self.formatter.format_player_position(self.time_stamp, i + 1, position.x, position.y)
+        for player_connection in self.player_connections:
+            position = self.multi_tag_positioning.get_position(player_connection.tag_id)
+            message = self.formatter.format_player_position(self.time_stamp, player_connection.player_id, position.x, position.y)
             self.multicast_sender.send(message)
 
-    def send_anchor_positions_to_client(self, client_socket, addr, connections):
-        """Broadcasts the anchor positions
+    def send_setup_data(self, client_socket, addr, player_tags_copy):
+        """ Sends the initial information to a client before the game starts
             Parameters:
                 client_socket (socket): The socket with connection to the client
-                addr (tuple): tuple with the ip and port received from the client
-                connections (list): list consisting of the unique clients that have connected"""
-        for i in range(0, len(self.setup.anchors)):
-            anchor = self.setup.anchors[i]
-            message = self.formatter.format_anchor_position(i, int(anchor.x), int(anchor.y), 0)
-            if self.setup.debug_mode:
-                print('sending', message, 'to', addr)
-            client_socket.sendall(message.encode('UTF-8'))
+                addr (tuple): tuple with the connected players ip and port
+                player_tags_copy (list): list of the player tags
+        """
+        # If the PlayerConnection should be appended to the list of players connected
+        should_append = False
 
-        if self.setup.debug_mode:
-            # Receive a message back from client when they have received the info
-            # 1024 is an arbitrary large number to ensure that we can receive the whole message
-            recv_msg = client_socket.recv(1024)  
-            print('received ', recv_msg, 'from ', addr)
+        # Look up the a player connection from the addr
+        player_connection = next((x for x in self.player_connections if x.addr[0] == addr[0]), None)
+        if player_connection is None:
+            # if none is found a new is created
+            player_connection = PlayerConnection(addr, player_tags_copy.pop(), len(self.player_connections) + 1)
+            should_append = True
+        else:
+            if self.setup.debug_mode:
+                print('This address has already connected to the game')
+
+        self.send_anchor_positions_to_client(client_socket, player_connection)
+        self.send_player_tag(client_socket, player_connection)
+
+        # We only want to append to the list if its a new connection
+        # This is done after sending, to avoid the main program from continuing before data is sent
+        if should_append:
+            self.player_connections.append(player_connection)
+
+        # All information has been sent so we append the player_connection and close the socket
         client_socket.close()
 
-        # If we have not sent to this address before we store it
-        if addr not in connections:
-            connections.append(addr)
+    def send_player_tag(self, client_socket, player_connection):
+        """ Sends the player tag that the client will be using in the game 
+            Parameters:
+                client_socket (socket): The socket with connection to the client
+                player_connection (PlayerConnection): object with data about the player connected such as ip and port, player_tag and player_id
+        """
+        message = self.formatter.format_player_tag(player_connection.player_id, player_connection.tag_id)
+        if self.setup.debug_mode:
+            print('sending', message, 'to', player_connection.addr)
+        client_socket.sendall(message)
+
+    def send_anchor_positions_to_client(self, client_socket, player_connection):
+        """ Broadcasts the anchor positions
+            Parameters:
+                client_socket (socket): The socket with connection to the client
+                player_connection (PlayerConnection): object with data about the player connected such as ip, player_tag and player_id
+        """
+        for i in range(0, len(self.setup.anchors)):
+            anchor = self.setup.anchors[i]
+            message = self.formatter.format_anchor_position(i, int(anchor.x), int(anchor.y))
+            if self.setup.debug_mode:
+                print('sending', message, 'to', player_connection.addr)
+            client_socket.sendall(message)
+
 
     async def send_goalzone_positions(self):
         """ Broadcasts the goalzone positions"""
-        blue_team_message = self.formatter.format_goal_position(self.time_stamp, 0, int(self.goalzone_generator.center_of_blue_goal[0]), 
+        blue_team_message = self.formatter.format_goal_position(0, int(self.goalzone_generator.center_of_blue_goal[0]), 
                                                                 int(self.goalzone_generator.center_of_blue_goal[1]))
-        red_team_message = self.formatter.format_goal_position(self.time_stamp, 1, int(self.goalzone_generator.center_of_red_goal[0]), 
+        red_team_message = self.formatter.format_goal_position( 1, int(self.goalzone_generator.center_of_red_goal[0]), 
                                                                 int(self.goalzone_generator.center_of_red_goal[1]))
         self.multicast_sender.send(blue_team_message)
         self.multicast_sender.send(red_team_message)
 
     async def send_goal_scored(self):
         """Broadcasts that a goal was scored for either team"""
-        goal_message = self.formatter.format_goal_scored(self.time_stamp, self.setup.teams[0].score, self.setup.teams[1].score)
+        goal_message = self.formatter.format_goal_scored(self.setup.teams[0].score, self.setup.teams[1].score)
         self.multicast_sender.send(goal_message)
 
 
