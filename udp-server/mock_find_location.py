@@ -1,3 +1,4 @@
+import random
 class MockMultiTagPositioning:
 	"""Class that mocks positioning data. Used for when the pozyx hardware is not available """
 	def __init__(self, tag_ids):
@@ -8,10 +9,10 @@ class MockMultiTagPositioning:
 		"""
 		self.player_dict = {
 			tag_ids[0]: TagPosition(1, 1),
-			tag_ids[1]: TagPosition(100, 100),
-			tag_ids[2]: TagPosition(550, 200),
-			tag_ids[3]: TagPosition(50, 50),
-			tag_ids[4]: TagPosition(700, 200),
+			#tag_ids[1]: TagPosition(100, 100),
+			#tag_ids[2]: TagPosition(550, 200),
+			#tag_ids[3]: TagPosition(50, 50),
+			#tag_ids[4]: TagPosition(700, 200),
 		}
 
 	def get_position(self, tag_id):
@@ -22,8 +23,14 @@ class MockMultiTagPositioning:
 		"""
 		
 		position = self.player_dict[tag_id]
-		self.player_dict[tag_id].x = self.player_dict[tag_id].x + 1
-		self.player_dict[tag_id].y = self.player_dict[tag_id].y + 1
+		random_x = random.randint(-1, 1)
+		random_y = random.randint(-1, 1)
+
+		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 20 :
+			self.player_dict[tag_id].x = self.player_dict[tag_id].x + random_x
+		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 10:
+			self.player_dict[tag_id].y = self.player_dict[tag_id].y + random_y
+
 		return position
 
 

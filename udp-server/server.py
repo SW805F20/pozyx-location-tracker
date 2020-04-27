@@ -44,10 +44,16 @@ class Server:
         self.tcp_socket.listen(self.setup.amount_of_players)
         player_tags_copy = copy.copy(self.setup.player_tags)
 
+        self.tcp_socket.settimeout(2.0)
         while len(self.player_connections) < self.setup.amount_of_players:
             if self.setup.debug_mode:
                 print('Waiting for connections')
-            conn, addr = self.tcp_socket.accept()
+            try:
+                conn, addr = self.tcp_socket.accept()
+            except socket.timeout:
+                print('Received no incoming connection')
+                continue
+            
             
             if self.setup.debug_mode:
                 print('connection from', addr)
@@ -62,7 +68,13 @@ class Server:
             # The client is handled on a thread to allow the server to go 
             # back and wait for connection as data is sent to the first client
             client_handler.start()
+        
+        print('All players have connected to the game \n \
+            Starting game...')
+        self.send_game_start()
 
+    def send_game_start(self):
+        return None
 
     async def run(self):
         """Function that loops and continuously broadcasts the position of all tags"""
@@ -96,8 +108,9 @@ class Server:
     async def goal_scored_procedure(self):
         """Calls the necessary functions when a goal has been scored"""
         self.goalzone_generator.generate_random_goalzones()
-        await asyncio.create_task(self.send_goalzone_positions())
-        await asyncio.create_task(self.send_goal_scored())
+        for player_con in self.player_connections:
+            await asyncio.create_task(self.send_goalzone_positions(player_con.client_socket))
+            await asyncio.create_task(self.send_goal_scored(player_con.client_socket))
 
     async def update_ball_position(self):
         """Broadcasts the updated ball position"""
@@ -109,7 +122,7 @@ class Server:
     async def update_player_positions(self):
         """Broadcasts updated positions for all players"""
         for player_connection in self.player_connections:
-            position = self.multi_tag_positioning.get_position(player_connection.tag_id)
+            position = self.multi_tag_positioning.get_position(player_connection.player_id - 1)
             message = self.formatter.format_player_position(self.time_stamp, player_connection.player_id, position.x, position.y)
             self.multicast_sender.send(message)
 
@@ -127,7 +140,7 @@ class Server:
         player_connection = next((x for x in self.player_connections if x.addr[0] == addr[0]), None)
         if player_connection is None:
             # if none is found a new is created
-            player_connection = PlayerConnection(addr, player_tags_copy.pop(), len(self.player_connections) + 1)
+            player_connection = PlayerConnection(addr, player_tags_copy.pop(), len(self.player_connections) + 1, client_socket)
             should_append = True
         else:
             if self.setup.debug_mode:
@@ -135,6 +148,7 @@ class Server:
 
         self.send_anchor_positions_to_client(client_socket, player_connection)
         self.send_player_tag(client_socket, player_connection)
+        self.send_goalzone_positions(client_socket)
 
         # We only want to append to the list if its a new connection
         # This is done after sending, to avoid the main program from continuing before data is sent
@@ -169,19 +183,25 @@ class Server:
             client_socket.sendall(message)
 
 
-    async def send_goalzone_positions(self):
-        """ Broadcasts the goalzone positions"""
+    def send_goalzone_positions(self, client_socket):
+        """ Broadcasts the goalzone positions
+            Parameters:
+                client_socket (socket): The socket with connection to the client
+        """
         blue_team_message = self.formatter.format_goal_position(0, int(self.goalzone_generator.center_of_blue_goal[0]), 
-                                                                int(self.goalzone_generator.center_of_blue_goal[1]))
-        red_team_message = self.formatter.format_goal_position( 1, int(self.goalzone_generator.center_of_red_goal[0]), 
-                                                                int(self.goalzone_generator.center_of_red_goal[1]))
-        self.multicast_sender.send(blue_team_message)
-        self.multicast_sender.send(red_team_message)
+                                                                int(self.goalzone_generator.center_of_blue_goal[1]), int(self.goalzone_generator.goal_zone_middle_offset))
+        red_team_message = self.formatter.format_goal_position(1, int(self.goalzone_generator.center_of_red_goal[0]), 
+                                                                int(self.goalzone_generator.center_of_red_goal[1]), int(self.goalzone_generator.goal_zone_middle_offset))
+        client_socket.sendall(blue_team_message)
+        client_socket.sendall(red_team_message)
 
-    async def send_goal_scored(self):
-        """Broadcasts that a goal was scored for either team"""
+    def send_goal_scored(self, client_socket):
+        """Broadcasts that a goal was scored for either team
+            Parameters:
+                client_socket (socket): The socket with connection to the client
+        """
         goal_message = self.formatter.format_goal_scored(self.setup.teams[0].score, self.setup.teams[1].score)
-        self.multicast_sender.send(goal_message)
+        client_socket.sendall(goal_message)
 
 
 

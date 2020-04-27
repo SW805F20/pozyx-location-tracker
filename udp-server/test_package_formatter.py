@@ -57,8 +57,8 @@ def test_formatPlayerPosition_sets_correct_packageId():
 
 def test_formatGoalPosition_sets_correct_packageId():
     formatter = PackageFormatter()
-    package = formatter.format_goal_position(1, 10000, 10000)
-    assert package == b'140x271027100105'
+    package = formatter.format_goal_position(1, 10000, 10000, 10)
+    assert package == b'150xa271027100105'
 
 
 def test_formatGoalScored_sets_correct_packageId():
