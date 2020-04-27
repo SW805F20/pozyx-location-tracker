@@ -30,9 +30,9 @@ class Setup:
             self.amount_of_players = 1
             self.ball_tag = 0x0
             self.anchors.append(Anchor(0x1, 0, 0, 0))
-            self.anchors.append(Anchor(0x2, 0, 10, 0))
-            self.anchors.append(Anchor(0x3, 20, 10, 0))
-            self.anchors.append(Anchor(0x4, 20, 0, 0))
+            self.anchors.append(Anchor(0x2, 0, 1000, 0))
+            self.anchors.append(Anchor(0x3, 2000, 1000, 0))
+            self.anchors.append(Anchor(0x4, 2000, 0, 0))
             self.player_tags.append(0x1)
             #self.player_tags.append(0x2)
             #self.player_tags.append(0x3)
