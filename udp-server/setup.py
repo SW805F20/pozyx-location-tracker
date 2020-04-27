@@ -1,5 +1,6 @@
 import re
 import copy
+from zero_conf_register import ZeroConfRegister
 
 class Setup:
     def __init__(self):
@@ -222,3 +223,5 @@ class Team:
 if __name__ == "__main__":
     setup = Setup()
     setup.start()
+    zero_conf = ZeroConfRegister()
+    zero_conf.register_service("name")

@@ -1,56 +1,32 @@
 import sys
 import time
-import select
 import socket
-import bonjour
 
+from zeroconf import ServiceInfo, Zeroconf, IPVersion
 
+class ZeroConfRegister():
+    def register_service(self, name):
 
-# Callback for service registration
-def register_callback(sd_ref, flags, error_code, name, regtype, domain, context):
-    print("Service registered:", name, regtype, domain)
+        ip_version = IPVersion.All
 
+        desc = {'path': 'Untitled Game'}
 
-if len(sys.argv) < 4:
-    print("Usage: register.py servicename regtype port")
-    sys.exit(1)
+        info = ServiceInfo(
+            "_http._tcp.local.",
+            "Lobby {}._http._tcp.local.".format(name),
+            addresses=[socket.inet_aton("127.0.0.1")],
+            port=80,
+            properties=desc,
+            server="ash-2.local.",
+        )
 
-servicename = sys.argv[1]
-regtype = sys.argv[2]
-port = int(sys.argv[3])
-# Allocate a service discovery reference and register the specified service
-flags = 0
-interface_index = 0
-domain = ''
-host = ''
-txt_len = 0
-txt_record = ''
-user_data = None
-serviceRef = bonjour.AllocateDNSServiceRef()
-ret = bonjour.pyDNSServiceRegister(serviceRef,
-                                   flags,
-                                   interface_index,
-                                   servicename,
-                                   regtype,
-                                   domain,
-                                   host,
-                                   port,
-                                   txt_len,
-                                   txt_record,
-                                   register_callback,
-                                   user_data)
-
-
-if ret != bonjour.kDNSServiceErr_NoError:
-    print("error %d returned; exiting" % ret)
-    sys.exit(ret)
-
-# Get the socket and loop
-fd = bonjour.DNSServiceRefSockFD(serviceRef)
-while 1:
-    ret = select.select([fd], [], [])
-    ret = bonjour.DNSServiceProcessResult(serviceRef)
-
-# Deallocate the service discovery ref
-bonjour.DNSServiceRefDeallocate(serviceRef)
-
+        zeroconf = Zeroconf(ip_version=ip_version)
+        print("Registration of a service, press Ctrl-C to exit...")
+        zeroconf.register_service(info)
+        try:
+            while True:
+                time.sleep(0.1)
+        finally:
+            print("Unregistering...")
+            zeroconf.unregister_service(info)
+            zeroconf.close()
