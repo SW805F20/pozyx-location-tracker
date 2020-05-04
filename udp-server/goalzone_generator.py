@@ -50,8 +50,10 @@ class GoalzoneGenerator:
         # Gets the initial goal zones
         self.center_of_blue_goal, self.center_of_red_goal = self.calculate_initial_goal_centers()
 
-        # To avoid outliers several goals should be counted in a sequence. This is the accumulator for this.
-        self.accumulated_goals = 0
+        # To avoid outliers several goals should be counted in a sequence. These are the accumulators for this.
+        self.accumulated_goals_red = 0
+        self.accumulated_goals_blue = 0
+
 
     def set_goal_length_percentage(self, goal_length_percentage):
         """ 
@@ -181,11 +183,11 @@ class GoalzoneGenerator:
             ball_position ((int, int)): tuple with the x and y coordinate of the ball.
         """
         if self.goal_scored_red(ball_position):
-            if self.goal_accumulator():
+            if self.goal_accumulator("red"):
                 return True
         else:
-            if self.accumulated_goals != 0:
-                self.accumulated_goals = 0
+            if self.accumulated_goals_red != 0:
+                self.accumulated_goals_red = 0
 
         return False
 
@@ -198,19 +200,25 @@ class GoalzoneGenerator:
             ball_position ((int, int)): tuple with the x and y coordinate of the ball.
         """
         if self.goal_scored_blue(ball_position):
-            if self.goal_accumulator():
+            if self.goal_accumulator("blue"):
                 return True
         else:
-            if self.accumulated_goals != 0:
-                self.accumulated_goals = 0
+            if self.accumulated_goals_blue != 0:
+                self.accumulated_goals_blue = 0
 
         return False
 
-    def goal_accumulator(self):
-        self.accumulated_goals += 1
-        if self.accumulated_goals == self.ACCUMULATED_GOALS_NEEDED:
-            self.accumulated_goals = 0
-            return True
+    def goal_accumulator(self, team_color):
+        if team_color == "red":
+            self.accumulated_goals_red += 1
+            if self.accumulated_goals_red == self.ACCUMULATED_GOALS_NEEDED:
+                self.accumulated_goals_red = 0
+                return True
+        else:
+            if team_color == "blue":
+                self.accumulated_goals_blue += 1
+                if self.accumulated_goals_blue == self.ACCUMULATED_GOALS_NEEDED:
+                    self.accumulated_goals_blue = 0
+                    return True
 
         return False
-

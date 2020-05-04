@@ -106,12 +106,12 @@ class TestGoalGenerator(unittest.TestCase):
         for _ in accumulation_range:
             goalzone_gen.accumulate_goals_scored_blue(ball_position)
 
-        assert goalzone_gen.accumulated_goals == 2
+        assert goalzone_gen.accumulated_goals_blue == 2
 
         ball_position = (10, 10)
         goalzone_gen.accumulate_goals_scored_blue(ball_position)
 
-        assert goalzone_gen.accumulated_goals == 0
+        assert goalzone_gen.accumulated_goals_blue == 0
 
     def test_accumulate_goals_should_reset_red(self):
         goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
@@ -120,15 +120,15 @@ class TestGoalGenerator(unittest.TestCase):
         for _ in accumulation_range:
             goalzone_gen.accumulate_goals_scored_red(ball_position)
 
-        assert goalzone_gen.accumulated_goals == 2
+        assert goalzone_gen.accumulated_goals_red == 2
 
         ball_position = (10, 10)
         goalzone_gen.accumulate_goals_scored_red(ball_position)
 
-        assert goalzone_gen.accumulated_goals == 0
+        assert goalzone_gen.accumulated_goals_red == 0
 
     def test_accumulate_goals_should_increment(self):
         goalzone_gen = GoalzoneGenerator(anchor_list, goal_length_percentage)
-        goalzone_gen.goal_accumulator()
+        goalzone_gen.goal_accumulator("red")
 
-        assert goalzone_gen.accumulated_goals == 1
+        assert goalzone_gen.accumulated_goals_red == 1

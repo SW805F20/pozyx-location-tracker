@@ -97,20 +97,18 @@ class Server:
         ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
         if self.goalzone_generator.accumulate_goals_scored_blue((ball_pos.x, ball_pos.y)):
             self.setup.teams[0].score += 1
-            goal_scored_task = await asyncio.create_task(self.goal_scored_procedure())
-            await goal_scored_task
+            self.goal_scored_procedure()
 
         if self.goalzone_generator.accumulate_goals_scored_red((ball_pos.x, ball_pos.y)):
             self.setup.teams[1].score += 1
-            goal_scored_task = await asyncio.create_task(self.goal_scored_procedure())
-            await goal_scored_task
+            self.goal_scored_procedure()
 
-    async def goal_scored_procedure(self):
+    def goal_scored_procedure(self):
         """Calls the necessary functions when a goal has been scored"""
         self.goalzone_generator.generate_random_goalzones()
         for player_con in self.player_connections:
-            await asyncio.create_task(self.send_goalzone_positions(player_con.client_socket))
-            await asyncio.create_task(self.send_goal_scored(player_con.client_socket))
+            self.send_goalzone_positions(player_con.client_socket)
+            self.send_goal_scored(player_con.client_socket)
 
     async def update_ball_position(self):
         """Broadcasts the updated ball position"""
@@ -155,8 +153,6 @@ class Server:
         if should_append:
             self.player_connections.append(player_connection)
 
-        # All information has been sent so we append the player_connection and close the socket
-        client_socket.close()
 
     def send_player_tag(self, client_socket, player_connection):
         """ Sends the player tag that the client will be using in the game 
