@@ -109,11 +109,16 @@ class PackageFormatter:
         package = package | time_stamp		# package = 0xYYYYXXXXGGTT
         package = package << 8				# package = 0xYYYYXXXXGGTT00
         package = package | package_type    # package = 0xYYYYXXXXGGTTII
-        
-        
+
         return hex(package).encode('UTF-8')
 
-
+    def format_game_start(self):
+        """
+		Formats a package for signaling a game start
+		"""
+        package = 0x3
+        hex_package = hex(package)
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
 
 if __name__ == "__main__":
     formatter = PackageFormatter()

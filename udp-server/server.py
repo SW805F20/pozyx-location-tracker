@@ -1,7 +1,6 @@
 from setup import Setup
 from find_location import MultitagPositioning
 from socket_multicast_sender import SocketMulticastSender
-from socket_multicast_receiver import SocketMulticastReceiver
 from tcp_socket import TCPSocket
 from package_formatter import PackageFormatter
 from mock_find_location import MockMultiTagPositioning
@@ -69,12 +68,26 @@ class Server:
             # back and wait for connection as data is sent to the first client
             client_handler.start()
         
-        print('All players have connected to the game \n \
-            Starting game...')
-        self.send_game_start()
+        self.prompt_game_start()
 
-    def send_game_start(self):
-        return None
+    def prompt_game_start(self):
+        """ Function that awaits a confirmation from host client before it starts sending positions
+            On the UDP client socket. """
+        print('All players have connected to the game.')
+        start_game = ""
+
+        while start_game != "y":
+            start_game = input("Start game? (y/n): ")
+
+        for player_con in self.player_connections:
+            self.send_start_game(player_con.client_socket)
+
+    def send_start_game(self, client_socket):
+        """ Function that sends the formatted package to players """
+        message = self.formatter.format_game_start()
+        if self.setup.debug_mode:
+            print('sending game start signal')
+        client_socket.sendall(message)
 
     async def run(self):
         """Function that loops and continuously broadcasts the position of all tags"""
@@ -177,7 +190,6 @@ class Server:
             if self.setup.debug_mode:
                 print('sending', message, 'to', player_connection.addr)
             client_socket.sendall(message)
-
 
     def send_goalzone_positions(self, client_socket):
         """ Broadcasts the goalzone positions

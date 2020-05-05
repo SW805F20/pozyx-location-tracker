@@ -23,12 +23,12 @@ class MockMultiTagPositioning:
 		"""
 		
 		position = self.player_dict[tag_id]
-		random_x = random.randint(-1, 1)
-		random_y = random.randint(-1, 1)
+		random_x = random.randint(-2, 2)
+		random_y = random.randint(-2, 2)
 
-		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 20 :
+		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 1000 :
 			self.player_dict[tag_id].x = self.player_dict[tag_id].x + random_x
-		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 10:
+		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 1000:
 			self.player_dict[tag_id].y = self.player_dict[tag_id].y + random_y
 
 		return position
