@@ -1,4 +1,5 @@
 import random
+import time
 class MockMultiTagPositioning:
 	"""Class that mocks positioning data. Used for when the pozyx hardware is not available """
 	def __init__(self, tag_ids):
@@ -21,7 +22,7 @@ class MockMultiTagPositioning:
 		Parameters:
 			tag_id(string): tag id of the player that we are getting the position for
 		"""
-		
+		time.sleep(0.2)
 		position = self.player_dict[tag_id]
 		random_x = random.randint(-2, 2)
 		random_y = random.randint(-2, 2)
