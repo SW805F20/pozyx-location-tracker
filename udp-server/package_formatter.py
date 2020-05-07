@@ -100,9 +100,9 @@ class PackageFormatter:
 			pos_x (int): x coordinate of the goal corner (X)
 			pos_y (int): y coordinate of the goal corner (Y)
 		"""
-        package = pos_y 					# package = 0xYYYY
+        package = int(pos_y)					# package = 0xYYYY
         package = package << 16				# package = 0xYYYY0000
-        package = package | pos_x			# package = 0xYYYYXXXX
+        package = package | int(pos_x)			# package = 0xYYYYXXXX
         package = package << 8	    		# package = 0xYYYYXXXX00
         package = package | tag_id			# package = 0xYYYYXXXXGG
         package = package << 8				# package = 0xYYYYXXXXGG00

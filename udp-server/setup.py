@@ -29,10 +29,10 @@ class Setup:
         if use_mock_data == "y":
             self.amount_of_players = 4
             self.ball_tag = 0x6763
-            self.anchors.append(Anchor(0x6779, 0, 0, 2180))
-            self.anchors.append(Anchor(0x676e, 0, 2900, 1810))
-            self.anchors.append(Anchor(0x6e2b, 3570, 2900, 2030))
-            self.anchors.append(Anchor(0x6738, 3250, 0, 2200))
+            self.anchors.append(Anchor(0x6779, 0, 0, 218))
+            self.anchors.append(Anchor(0x676e, 0, 290, 181))
+            self.anchors.append(Anchor(0x6e2b, 357, 290, 203))
+            self.anchors.append(Anchor(0x6738, 325, 0, 220))
             self.player_tags.append(0x6979)
             self.player_tags.append(0x6915)
             self.player_tags.append(0x602e)
