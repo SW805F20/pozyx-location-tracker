@@ -27,6 +27,7 @@ class Server:
         self.multicast_sender = SocketMulticastSender(('224.3.29.71', 10000), 1)
         self.tcp_socket = TCPSocket(tcp_port=10000)
         self.player_connections = []
+        self.player_id_counter = 1
         print('Server running on IP', self.tcp_socket.tcp_ip)
         self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
 
@@ -151,7 +152,8 @@ class Server:
         player_connection = next((x for x in self.player_connections if x.addr[0] == addr[0]), None)
         if player_connection is None:
             # if none is found a new is created
-            player_connection = PlayerConnection(addr, player_tags_copy.pop(), len(self.player_connections) + 1, client_socket)
+            player_connection = PlayerConnection(addr, player_tags_copy.pop(), self.player_id_counter, client_socket)
+            self.player_id_counter += 1
             should_append = True
         else:
             if self.setup.debug_mode:
