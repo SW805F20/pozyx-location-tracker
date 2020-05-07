@@ -27,16 +27,16 @@ class Setup:
     def prompt_mock_data(self):
         use_mock_data = input("Use mock data? (y/n) ")
         if use_mock_data == "y":
-            self.amount_of_players = 1
-            self.ball_tag = 0x0
-            self.anchors.append(Anchor(0x1, 0, 0, 0))
-            self.anchors.append(Anchor(0x2, 0, 1000, 0))
-            self.anchors.append(Anchor(0x3, 1000, 1000, 0))
-            self.anchors.append(Anchor(0x4, 1000, 0, 0))
-            self.player_tags.append(0x1)
-            #self.player_tags.append(0x2)
-            #self.player_tags.append(0x3)
-            #self.player_tags.append(0x4)
+            self.amount_of_players = 4
+            self.ball_tag = 0x6763
+            self.anchors.append(Anchor(0x6779, 0, 0, 2180))
+            self.anchors.append(Anchor(0x676e, 0, 2900, 1810))
+            self.anchors.append(Anchor(0x6e2b, 3570, 2900, 2030))
+            self.anchors.append(Anchor(0x6738, 3250, 0, 2200))
+            self.player_tags.append(0x6979)
+            self.player_tags.append(0x6915)
+            self.player_tags.append(0x602e)
+            self.player_tags.append(0x690f)
             return True
         return False
 
@@ -65,7 +65,7 @@ class Setup:
         while True:
             ball_tag = input("Ball tag: ")
             if self.is_hex(ball_tag):
-                self.ball_tag = ball_tag
+                self.ball_tag = int(ball_tag)
                 break
             else:
                 print("Ball tag must be hexadecimal, please try again.")
@@ -131,7 +131,7 @@ class Setup:
                     player_tag = input("[{}] Player {}'s tag: "
                                        .format(self.TEAM_NAMES[1], i - (self.amount_of_players // 2)))
                 if self.is_hex(player_tag):
-                    self.player_tags.append(player_tag)
+                    self.player_tags.append(int(player_tag))
                     break
                 else:
                     print("Player tag must be hexadecimal, please try again.")
@@ -206,7 +206,7 @@ class Setup:
 
 class Anchor:
     def __init__(self, anchor_id, x, y, z):
-        self.id = anchor_id
+        self.id = int(anchor_id)
         self.x = int(x)
         self.y = int(y)
         self.z = int(z)

@@ -31,10 +31,10 @@ class Server:
         print('Server running on IP', self.tcp_socket.tcp_ip)
         self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
 
-        if should_mock:
-            self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
-        else:
-            self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
+        #if should_mock:
+        #    self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
+        #else:
+        self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
                                                              self.setup.anchors)
         self.formatter = PackageFormatter()
 
@@ -134,7 +134,7 @@ class Server:
     async def update_player_positions(self):
         """Broadcasts updated positions for all players"""
         for player_connection in self.player_connections:
-            position = self.multi_tag_positioning.get_position(player_connection.player_id - 1)
+            position = self.multi_tag_positioning.get_position(player_connection.tag_id)
             message = self.formatter.format_player_position(self.time_stamp, player_connection.player_id, position.x, position.y)
             self.multicast_sender.send(message)
 
