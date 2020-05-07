@@ -39,7 +39,7 @@ class MultitagPositioning(object):
         device_anchors = []
 
         for anchor in anchors:
-            device_anchors.append(DeviceCoordinates(anchor.id), 0, Coordinates(anchor.x, anchor.y, anchor.z))
+            device_anchors.append(DeviceCoordinates(anchor.id, 0, Coordinates(anchor.x, anchor.y, anchor.z)))
         
         self.anchors = device_anchors
         self.pozyx = PozyxSerial(serial_port)
