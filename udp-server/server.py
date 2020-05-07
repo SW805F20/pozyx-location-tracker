@@ -10,6 +10,7 @@ import asyncio
 import threading
 import socket
 import copy
+import time
 
 
 class Server:
@@ -126,12 +127,14 @@ class Server:
 
     async def update_ball_position(self):
         """Broadcasts the updated ball position"""
+        time.sleep(0.25)
         ball_tag = self.setup.ball_tag
         position = self.multi_tag_positioning.get_position(ball_tag)
         message = self.formatter.format_player_position(self.time_stamp, 0, position.x, position.y)
         self.multicast_sender.send(message)
 
     async def update_player_positions(self):
+        time.sleep(0.25)
         """Broadcasts updated positions for all players"""
         for player_connection in self.player_connections:
             position = self.multi_tag_positioning.get_position(player_connection.player_id - 1)
