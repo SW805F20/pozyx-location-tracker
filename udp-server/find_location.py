@@ -84,7 +84,9 @@ class MultitagPositioning(object):
         for tag_id in self.tag_ids:
             status = self.pozyx.clearDevices(tag_id)
             for anchor in self.anchors:
-                status &= self.pozyx.addDevice(anchor, tag_id)
+                # Convert to millimeters before adding to pozyx
+                mm_device = DeviceCoordinates(anchor.network_id, 0, Coordinates(anchor.x * 10, anchor.y * 10, anchor.z * 10))
+                status &= self.pozyx.addDevice(mm_device, tag_id)
             if len(self.anchors) > 3:
                 status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors),
                                                            remote_id=tag_id)

@@ -78,7 +78,7 @@ class Setup:
         for i in range(1, 5):
             while True:
                 anchor_id = input("Id of anchor {}: ".format(i))
-                string = input("Position of anchor {}: ".format(i))
+                string = input("Position of anchor {} (cm): ".format(i))
                 coordinates = string.split()
                 if self.verify_anchor_coordinates(coordinates) and self.is_hex(anchor_id):
                     self.anchors.append(Anchor(anchor_id, coordinates[0], coordinates[1], coordinates[2]))
