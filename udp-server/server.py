@@ -1,3 +1,4 @@
+import time
 from setup import Setup
 from find_location import MultitagPositioning
 from socket_multicast_sender import SocketMulticastSender
@@ -90,9 +91,25 @@ class Server:
             print('sending game start signal')
         client_socket.sendall(message)
 
+    def send_end_game(self, client_socket):
+        """ Function that sends the formatted end game package to players
+            Parameters:
+                client_socket (socket): The socket with connection to the client
+        """
+        message = self.formatter.format_game_end()
+        if self.setup.debug_mode:
+            print('sending game start signal')
+        client_socket.sendall(message)
+
+    def send_end_all_players(self):
+        """ Function to send an endgame message to all connected players """
+        for player_con in self.player_connections:
+            self.send_end_game(player_con.client_socket)
+
     async def run(self):
-        """Function that loops and continuously broadcasts the position of all tags"""
-        while True:
+        """ Function that loops and continuously broadcasts the position of all tags """
+        game_running = True
+        while game_running:
             update_ball_pos_task = asyncio.create_task(self.update_ball_position())
             update_player_pos_task = asyncio.create_task(self.update_player_positions())
             update_goal_zone_task = asyncio.create_task(self.update_goal_zone())
@@ -103,6 +120,21 @@ class Server:
 
             # %256 because max value for the time stamp is 255
             self.time_stamp = (self.time_stamp + 1) % 256
+
+            if (self.setup.amount_of_goals == self.setup.teams[0].score or
+                    self.setup.amount_of_goals == self.setup.teams[1].score):
+                game_running = False
+                self.setup.teams[0].score = 0
+                self.setup.teams[1].score = 0
+
+        if not game_running:
+            self.send_end_all_players()
+            # Unity waits for 3 seconds when the game ends, so doing it here as well prevents host from 
+            # sending new game before players are ready.
+            time.sleep(3)
+            self.prompt_game_start()
+            await self.run()
+
 
     async def update_goal_zone(self):
         """ Updates the goal zone if ball is inside goal zone """
@@ -160,6 +192,7 @@ class Server:
                 print('This address has already connected to the game')
 
         self.send_anchor_positions_to_client(client_socket, player_connection)
+        self.send_player_goal_amount(client_socket, player_connection)
         self.send_player_tag(client_socket, player_connection)
         self.send_goalzone_positions(client_socket)
 
@@ -168,6 +201,16 @@ class Server:
         if should_append:
             self.player_connections.append(player_connection)
 
+    def send_player_goal_amount(self, client_socket, player_connection):
+        """ Sends the number of players and the required goal amount
+                    Parameters:
+                        client_socket (socket): The socket with connection to the client
+                        player_connection (PlayerConnection): object with data about the player connected such as ip and port, player_tag and player_id
+                """
+        message = self.formatter.format_player_goal_amount(self.setup.amount_of_players, self.setup.amount_of_goals)
+        if self.setup.debug_mode:
+            print('sending', message, 'to', player_connection.addr)
+        client_socket.sendall(message)
 
     def send_player_tag(self, client_socket, player_connection):
         """ Sends the player tag that the client will be using in the game 

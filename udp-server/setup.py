@@ -4,6 +4,7 @@ import copy
 class Setup:
     def __init__(self):
         self.amount_of_players = 0
+        self.amount_of_goals = 0
         self.player_tags = []
         self.ball_tag = ""
         self.anchors = []
@@ -19,6 +20,7 @@ class Setup:
 
         if not self.mock:
             self.prompt_amount_of_players()
+            self.prompt_amount_of_goals()
             self.prompt_player_tags()
             self.prompt_anchors()
             self.prompt_ball_tag()
@@ -28,6 +30,7 @@ class Setup:
         use_mock_data = input("Use mock data? (y/n) ")
         if use_mock_data == "y":
             self.amount_of_players = 1
+            self.amount_of_goals = 100
             self.ball_tag = 0x0
             self.anchors.append(Anchor(0x1, 0, 0, 0))
             self.anchors.append(Anchor(0x2, 0, 1000, 0))
@@ -57,6 +60,18 @@ class Setup:
                 break
             else:
                 print("The input must be an integer, please try again.")
+
+        def prompt_amount_of_goals(self):
+            """
+    		Function that prompts the user for the amount of players in the game.
+    		"""
+            while True:
+                amount_of_goals = input("How many goals to win? ")
+                if self.is_int(amount_of_goals):
+                    self.amount_of_goals = int(amount_of_goals)
+                    break
+                else:
+                    print("The input must be an integer, please try again.")
 
     def prompt_ball_tag(self):
         """
