@@ -47,6 +47,7 @@ class PackageFormatter:
 			pos_x (int): x coordinate of the player tag (X)
 			pos_y (int): y coordinate of the player tag (Y)
 		"""
+        print("Tag-ID: " + str(tag_id) + " x: " + str(pos_x) + " y: " + str(pos_y))
         return self.format_position(pos_y, pos_x, tag_id, time_stamp, 0x0)
 
 

@@ -2,3 +2,4 @@ python-osc
 pypozyx
 requests
 pytest
+asyncio
