@@ -112,11 +112,35 @@ class PackageFormatter:
 
         return hex(package).encode('UTF-8')
 
+    def format_player_goal_amount(self, player_amount, goal_amount):
+        """
+        Formats a package for goal and player amounts for the game
+        Parameters:
+            player_amount(int): number of players (P)
+            goal_amount (int): number of goals to win (G)
+        """
+        package = player_amount             # package = 0xPP
+        package = package << 8              # package = 0xPP00
+        package = package | goal_amount     # package = 0xPPGG
+        package = package << 8              # package = 0xPPGG00
+        package = package | 0x6             # package = 0xPPGGII
+
+        hex_package = hex(package)
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
+
     def format_game_start(self):
         """
 		Formats a package for signaling a game start
 		"""
         package = 0x3
+        hex_package = hex(package)
+        return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
+
+    def format_game_end(self):
+        """
+        Formats a package for signaling a game has ended
+        """
+        package = 0x7
         hex_package = hex(package)
         return str(len(hex_package)).encode('UTF-8').zfill(2) + hex_package.encode('UTF-8')
 
