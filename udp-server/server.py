@@ -31,10 +31,10 @@ class Server:
         print('Server running on IP', self.tcp_socket.tcp_ip)
         self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
 
-        if should_mock:
-            self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
-        else:
-            self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
+        #if should_mock:
+         #   self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
+        #else:
+        self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
                                                              self.setup.anchors)
         self.formatter = PackageFormatter()
 
@@ -109,6 +109,8 @@ class Server:
 
         # Accumulate consecutive goals and then broadcast newly generated goalzones
         ball_pos = self.multi_tag_positioning.get_position(self.setup.ball_tag)
+        if ball_pos is None:
+            return
         if self.goalzone_generator.accumulate_goals_scored_blue((ball_pos.x, ball_pos.y)):
             self.setup.teams[0].score += 1
             self.goal_scored_procedure()
@@ -128,15 +130,17 @@ class Server:
         """Broadcasts the updated ball position"""
         ball_tag = self.setup.ball_tag
         position = self.multi_tag_positioning.get_position(ball_tag)
-        message = self.formatter.format_player_position(self.time_stamp, 0, position.x, position.y)
-        self.multicast_sender.send(message)
+        if position is not None:
+            message = self.formatter.format_player_position(self.time_stamp, 0, position.x, position.y)
+            self.multicast_sender.send(message)
 
     async def update_player_positions(self):
         """Broadcasts updated positions for all players"""
         for player_connection in self.player_connections:
-            position = self.multi_tag_positioning.get_position(player_connection.player_id - 1)
-            message = self.formatter.format_player_position(self.time_stamp, player_connection.player_id, position.x, position.y)
-            self.multicast_sender.send(message)
+            position = self.multi_tag_positioning.get_position(player_connection.tag_id)
+            if position is not None:
+                message = self.formatter.format_player_position(self.time_stamp, player_connection.player_id, position.x, position.y)
+                self.multicast_sender.send(message)
 
     def send_setup_data(self, client_socket, addr, player_tags_copy):
         """ Sends the initial information to a client before the game starts
@@ -218,6 +222,6 @@ class Server:
 
 
 if __name__ == "__main__":
-    server = Server(True)
+    server = Server(False)
     server.setup_game()
     asyncio.run(server.run())

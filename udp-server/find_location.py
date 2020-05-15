@@ -1,65 +1,25 @@
 
-# !/usr/bin/env python
-"""
-The Pozyx ready to localize tutorial (c) Pozyx Labs
-Please read the tutorial that accompanies this sketch:
-https://www.pozyx.io/Documentation/Tutorials/ready_to_localize/Python
+from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, PozyxRegisters, version,
+                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
 
-This tutorial requires at least the contents of the Pozyx Ready to
-Localize kit. It demonstrates the positioning capabilities
-of the Pozyx device both locally and remotely. Follow the steps to
-correctly set up your environment in the link, change the
-parameters and upload this sketch. Watch the coordinates change as
-you move your device around!
+from pypozyx.tools.version_check import perform_latest_version_check
 
-"""
-from pypozyx import (PozyxConstants,
-                     PozyxRegisters, version, PozyxSerial,
-                     get_first_pozyx_serial_port)
-from pypozyx.structures.device import Coordinates, DeviceCoordinates
 
 class MultitagPositioning(object):
+
     """Continuously performs multitag positioning"""
-
     def __init__(self, tag_ids, anchors):
-        """
-		Initializes pozyx and adds tags to the instance of the class
-		Parameters:
-			tag_ids (list): List containing the player tags and the ball tag
-			anchors (list): List containing all of the anchors
-		"""
+        ANCHOR_TYPEID = 1
+        perform_latest_version_check()
         self.tag_ids = tag_ids
-        self.algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
-        self.dimension = PozyxConstants.DIMENSION_3D
-        self.height = 1000
-        serial_port = get_first_pozyx_serial_port()
-        if serial_port is None:
-            print("No Pozyx connected. Check your USB cable or your driver!")
-            quit()
-        device_anchors = []
-
+        self.pozyx = PozyxSerial(get_first_pozyx_serial_port())
+        self.anchors = []
         for anchor in anchors:
-            device_anchors.append(DeviceCoordinates(anchor.id, 1, Coordinates(anchor.x, anchor.y, anchor.z)))
-        
-        self.anchors = device_anchors
-        self.pozyx = PozyxSerial(serial_port)
+            self.anchors.append(DeviceCoordinates(anchor.id, ANCHOR_TYPEID, Coordinates(anchor.x, anchor.y, anchor.z)))
+        self.algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
+        self.dimension = PozyxConstants.DIMENSION_2D
+        self.height = 1000
         self.setup()
-
-    def get_position(self, tag_id):
-        """
-        Gets the position of a tag
-        Parameters:
-            tag_id (string): hexadecimal id of the tag.
-        """
-        position = Coordinates()
-        status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
-
-	if status == POZYX_SUCCESS:
-	        position.x = int(position.x) / 10	# divided with 10 to convert it from mm to cm
-	        position.y = int(position.y) / 10	# divided with 10 to convert it from mm to cm
-	        return position
-	else:
-		print("ERROR GETTING POSITION FOR TAG " + str(tag_id))
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
@@ -79,10 +39,31 @@ class MultitagPositioning(object):
         print("------------POZYX MULTITAG POSITIONING V{} -------------".format(version))
         print("")
 
-        self.set_anchors_manual(save_to_flash=False)
+        self.setAnchorsManual(save_to_flash=False)
 
+        self.printPublishAnchorConfiguration()
 
-    def set_anchors_manual(self, save_to_flash=False):
+    def get_position(self, tag_id):
+        """Performs positioning and prints the results."""
+        print(tag_id)
+        position = Coordinates()
+        status = self.pozyx.doPositioning(
+            position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
+        if status == POZYX_SUCCESS:
+            self.printPublishPosition(position, tag_id)
+            return position
+        else:
+            self.printPublishErrorCode("positioning", tag_id)
+
+    def printPublishPosition(self, position, network_id):
+        """Prints the Pozyx's position and possibly sends it as a OSC packet"""
+        if network_id is None:
+            network_id = 0
+        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}".format("0x%0.4x" % network_id,
+                                                                 position.x, position.y, position.z)
+        print(s)
+
+    def setAnchorsManual(self, save_to_flash=False):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
         for tag_id in self.tag_ids:
             status = self.pozyx.clearDevices(tag_id)
@@ -94,5 +75,64 @@ class MultitagPositioning(object):
             # enable these if you want to save the configuration to the devices.
             if save_to_flash:
                 self.pozyx.saveAnchorIds(tag_id)
-                self.pozyx.saveRegisters(
-                    [PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
+                self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
+
+            self.printPublishConfigurationResult(status, tag_id)
+
+    def printPublishConfigurationResult(self, status, tag_id):
+        """Prints the configuration explicit result, prints and publishes error if one occurs"""
+        if tag_id is None:
+            tag_id = 0
+        if status == POZYX_SUCCESS:
+            print("Configuration of tag %s: success" % tag_id)
+        else:
+            self.printPublishErrorCode("configuration", tag_id)
+
+    def printPublishErrorCode(self, operation, network_id):
+        """Prints the Pozyx's error and possibly sends it as a OSC packet"""
+        error_code = SingleRegister()
+        status = self.pozyx.getErrorCode(error_code, network_id)
+        if network_id is None:
+            network_id = 0
+        if status == POZYX_SUCCESS:
+            print("Error %s on ID %s, %s" %
+                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
+
+        else:
+            # should only happen when not being able to communicate with a remote Pozyx.
+            self.pozyx.getErrorCode(error_code)
+            print("Error % s, local error code %s" % (operation, str(error_code)))
+
+    def printPublishAnchorConfiguration(self):
+        for anchor in self.anchors:
+            print("ANCHOR,0x%0.4x,%s" % (anchor.network_id, str(anchor.pos)))
+
+
+class Anchor:
+    def __init__(self, anchor_id, x, y, z):
+        self.id = anchor_id
+        self.x = int(x)
+        self.y = int(y)
+        self.z = int(z)
+
+
+if __name__ == "__main__":
+    # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
+
+    # IDs of the tags to position, add None to position the local tag as well.
+    tag_ids = [0x6915, 0x6763, 0x690f]
+
+    # necessary data for calibration
+    anchors = []
+    anchors.append(Anchor(0x6738, 0, 0, 1480))
+    anchors.append(Anchor(0x676e, 0, 2900, 1760))
+    anchors.append(Anchor(0x6e2b, 2500, 2900, 1750))
+    anchors.append(Anchor(0x676c, 2900, 0, 1530))
+
+    r = MultitagPositioning(tag_ids, anchors)
+    while True:
+        for tag in tag_ids:
+            r.get_position(tag)
+
+
+

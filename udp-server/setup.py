@@ -27,14 +27,14 @@ class Setup:
     def prompt_mock_data(self):
         use_mock_data = input("Use mock data? (y/n) ")
         if use_mock_data == "y":
-            self.amount_of_players = 1
-            self.ball_tag = 0x0
-            self.anchors.append(Anchor(0x1, 0, 0, 0))
-            self.anchors.append(Anchor(0x2, 0, 1000, 0))
-            self.anchors.append(Anchor(0x3, 1000, 1000, 0))
-            self.anchors.append(Anchor(0x4, 1000, 0, 0))
-            self.player_tags.append(0x1)
-            #self.player_tags.append(0x2)
+            self.amount_of_players = 2
+            self.ball_tag = 0x6763
+            self.anchors.append(Anchor(0x6738, 0, 0, 1480))
+            self.anchors.append(Anchor(0x676e, 0, 2900, 1760))
+            self.anchors.append(Anchor(0x6e2b, 2500, 2900, 1750))
+            self.anchors.append(Anchor(0x676c, 2900, 0, 1530))
+            self.player_tags.append(0x6915)
+            self.player_tags.append(0x690f)
             #self.player_tags.append(0x3)
             #self.player_tags.append(0x4)
             return True

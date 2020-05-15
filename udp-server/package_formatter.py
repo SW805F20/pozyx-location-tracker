@@ -10,9 +10,9 @@ class PackageFormatter:
 			pos_y (int): y coordinate of the anchor (Y)
             package_type (int): Type of the package that is being formatted (I)
 		"""
-        package = pos_y 					# package = 0xYYYY
+        package = int(pos_y / 10)  					# package = 0xYYYY
         package = package << 16				# package = 0xYYYY0000
-        package = package | pos_x			# package = 0xYYYYXXXX
+        package = package | int(pos_x / 10) 			# package = 0xYYYYXXXX
         package = package << 8	    		# package = 0xYYYYXXXX00
         package = package | tag_id			# package = 0xYYYYXXXXAA
         package = package << 8				# package = 0xYYYYXXXXPP00
@@ -59,15 +59,15 @@ class PackageFormatter:
 			pos_y (int): y coordinate of the goal corner (Y)
             goal_zone_center_offset (int): the length of the offset from the center of the goal (L)
 		"""
-        package = goal_zone_center_offset   # package = 0xLL
-        package = package << 16				# package = 0xLL0000
-        package = package | pos_y			# package = 0xLLYYYY
-        package = package << 16             # package = 0xLLYYYY0000
-        package = package | pos_x			# package = 0xLLYYYYXXXX
-        package = package << 8	    		# package = 0xLLYYYYXXXX00
-        package = package | team_id			# package = 0xLLYYYYXXXXGG
-        package = package << 8				# package = 0xLLYYYYXXXXGG00
-        package = package | 0x5             # package = 0xLLYYYYXXXXGGII
+        package = int(goal_zone_center_offset / 10)      # package = 0xLL
+        package = package << 16				            # package = 0xLL0000
+        package = package | int(pos_y / 10) 	            # package = 0xLLYYYY
+        package = package << 16                         # package = 0xLLYYYY0000
+        package = package | int(pos_x / 10) 			    # package = 0xLLYYYYXXXX
+        package = package << 8	    		            # package = 0xLLYYYYXXXX00
+        package = package | team_id			            # package = 0xLLYYYYXXXXGG
+        package = package << 8				            # package = 0xLLYYYYXXXXGG00
+        package = package | 0x5                         # package = 0xLLYYYYXXXXGGII
 
         hex_package = hex(package)
 
@@ -100,9 +100,9 @@ class PackageFormatter:
 			pos_x (int): x coordinate of the goal corner (X)
 			pos_y (int): y coordinate of the goal corner (Y)
 		"""
-        package = pos_y 					# package = 0xYYYY
+        package = int(pos_y / 10) 			# package = 0xYYYY
         package = package << 16				# package = 0xYYYY0000
-        package = package | pos_x			# package = 0xYYYYXXXX
+        package = package | int(pos_x / 10) 	# package = 0xYYYYXXXX
         package = package << 8	    		# package = 0xYYYYXXXX00
         package = package | tag_id			# package = 0xYYYYXXXXGG
         package = package << 8				# package = 0xYYYYXXXXGG00
