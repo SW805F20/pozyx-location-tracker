@@ -39,7 +39,7 @@ class MultitagPositioning(object):
         device_anchors = []
 
         for anchor in anchors:
-            device_anchors.append(DeviceCoordinates(anchor.id), 0, Coordinates(anchor.x, anchor.y, anchor.z))
+            device_anchors.append(DeviceCoordinates(anchor.id, 1, Coordinates(anchor.x, anchor.y, anchor.z)))
         
         self.anchors = device_anchors
         self.pozyx = PozyxSerial(serial_port)
@@ -52,11 +52,14 @@ class MultitagPositioning(object):
             tag_id (string): hexadecimal id of the tag.
         """
         position = Coordinates()
-        status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, tag_id)
+        status = self.pozyx.doPositioning(position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
 
-        position.x = position.x / 10	# divided with 10 to convert it from mm to cm
-        position.y = position.y / 10	# divided with 10 to convert it from mm to cm
-        return position
+	if status == POZYX_SUCCESS:
+	        position.x = int(position.x) / 10	# divided with 10 to convert it from mm to cm
+	        position.y = int(position.y) / 10	# divided with 10 to convert it from mm to cm
+	        return position
+	else:
+		print("ERROR GETTING POSITION FOR TAG " + str(tag_id))
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
@@ -84,10 +87,8 @@ class MultitagPositioning(object):
         for tag_id in self.tag_ids:
             status = self.pozyx.clearDevices(tag_id)
             for anchor in self.anchors:
-                # Convert to millimeters before adding to pozyx
-                mm_device = DeviceCoordinates(anchor.network_id, 0, Coordinates(anchor.x * 10, anchor.y * 10, anchor.z * 10))
-                status &= self.pozyx.addDevice(mm_device, tag_id)
-            if len(self.anchors) > 3:
+                status &= self.pozyx.addDevice(anchor, tag_id)
+            if len(self.anchors) > 4:
                 status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors),
                                                            remote_id=tag_id)
             # enable these if you want to save the configuration to the devices.

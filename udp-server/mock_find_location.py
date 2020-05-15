@@ -22,8 +22,8 @@ class MockMultiTagPositioning:
 			tag_id(string): tag id of the player that we are getting the position for
 		"""
 		position = self.player_dict[tag_id]
-		random_x = random.randint(-2, 2)
-		random_y = random.randint(-2, 2)
+		random_x = random.randint(-15, 15)
+		random_y = random.randint(-15, 15)
 
 		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 1000 :
 			self.player_dict[tag_id].x = self.player_dict[tag_id].x + random_x
