@@ -32,10 +32,10 @@ class Server:
         print('Server running on IP', self.tcp_socket.tcp_ip)
         self.goalzone_generator = GoalzoneGenerator(self.setup.anchors, 20)
 
-        #if should_mock:
-         #   self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
-        #else:
-        self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
+        if should_mock:
+            self.multi_tag_positioning = MockMultiTagPositioning([self.setup.ball_tag] + self.setup.player_tags)
+        else:
+            self.multi_tag_positioning = MultitagPositioning([self.setup.ball_tag] + self.setup.player_tags,
                                                              self.setup.anchors)
         self.formatter = PackageFormatter()
 
@@ -265,6 +265,6 @@ class Server:
 
 
 if __name__ == "__main__":
-    server = Server(False)
+    server = Server(True)
     server.setup_game()
     asyncio.run(server.run())

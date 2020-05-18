@@ -23,7 +23,7 @@ class SocketMulticastSender(socket.socket):
         """
         # our messages are 7 bytes and we want a max update speed of 70 Hz
         # Our version of Poxyz is onlt capable of sending about 60 Hz according to the documentation
-        self.maxSendRateBytesPerSecond = (70*7)
+        self.maxSendRateBytesPerSecond = (30*7)
         self.bytesAheadOfSchedule = 0
         self.time_now = None
         self.time_prev = None

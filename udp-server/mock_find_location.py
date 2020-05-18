@@ -9,7 +9,7 @@ class MockMultiTagPositioning:
 		"""
 		self.player_dict = {
 			tag_ids[0]: TagPosition(1, 1),
-			#tag_ids[1]: TagPosition(100, 100),
+			tag_ids[1]: TagPosition(1, 1),
 			#tag_ids[2]: TagPosition(550, 200),
 			#tag_ids[3]: TagPosition(50, 50),
 			#tag_ids[4]: TagPosition(700, 200),
@@ -22,12 +22,12 @@ class MockMultiTagPositioning:
 			tag_id(string): tag id of the player that we are getting the position for
 		"""
 		position = self.player_dict[tag_id]
-		random_x = random.randint(-15, 15)
-		random_y = random.randint(-15, 15)
+		random_x = random.randint(-100, 100)
+		random_y = random.randint(-100, 100)
 
-		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 1000 :
+		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 1500 :
 			self.player_dict[tag_id].x = self.player_dict[tag_id].x + random_x
-		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 1000:
+		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 1500:
 			self.player_dict[tag_id].y = self.player_dict[tag_id].y + random_y
 
 		return position
