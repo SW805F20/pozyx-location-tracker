@@ -123,22 +123,21 @@ class GoalzoneGenerator:
             if self.center_of_blue_goal[1] > self.center_of_field[1]:
                 # Goal zone middle offset ensures the goal does not have anchors that cross the middle, goal zone edge length ensures goals spawn a bit away from the middle line, and not on top of it.
                 random_x = random.uniform(self.min_x + self.goal_zone_middle_offset, self.max_x - self.goal_zone_middle_offset)
-                random_y = random.uniform(self.min_y + self.goal_zone_middle_offset, 
-                                            self.center_of_field[1] - self.goal_zone_middle_offset - self.goal_zone_edge_length)
-            
+                random_y = random.uniform(self.center_of_field[1] + self.goal_zone_middle_offset + self.goal_zone_edge_length, 
+                                            self.max_y - self.goal_zone_middle_offset)            
             else:
                 random_x = random.uniform(self.min_x + self.goal_zone_middle_offset, self.max_x - self.goal_zone_middle_offset)
-                random_y = random.uniform(self.center_of_field[1] + self.goal_zone_middle_offset + self.goal_zone_edge_length, 
-                                            self.max_y - self.goal_zone_middle_offset)
+                random_y = random.uniform(self.min_y + self.goal_zone_middle_offset, 
+                                            self.center_of_field[1] - self.goal_zone_middle_offset - self.goal_zone_edge_length)
         else:
             # For horizontal field - if blue center is > x then blue is on the right
             if self.center_of_blue_goal[0] > self.center_of_field[0]:
-                random_x = random.uniform(self.min_x + self.goal_zone_middle_offset, 
-                                            self.center_of_field[0] - self.goal_zone_middle_offset - self.goal_zone_edge_length)
-                random_y = random.uniform(self.min_y + self.goal_zone_middle_offset, self.max_y - self.goal_zone_middle_offset)
-            else:
                 random_x = random.uniform(self.center_of_field[0] + self.goal_zone_middle_offset + self.goal_zone_edge_length, 
                                             self.max_x - self.goal_zone_middle_offset)
+                random_y = random.uniform(self.min_y + self.goal_zone_middle_offset, self.max_y - self.goal_zone_middle_offset)
+            else:
+                random_x = random.uniform(self.min_x + self.goal_zone_middle_offset, 
+                                            self.center_of_field[0] - self.goal_zone_middle_offset - self.goal_zone_edge_length)
                 random_y = random.uniform(self.min_y + self.goal_zone_middle_offset, self.max_y - self.goal_zone_middle_offset)
 
         self.center_of_blue_goal = (random_x, random_y)
