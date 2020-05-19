@@ -50,8 +50,6 @@ class SocketMulticastSender(socket.socket):
         Parameters: 
             message (bytes): the bytes to send to the multicast group
         """
-        # Send data to the multicast group
-        print('sending {!r}'.format(message))
 
         self.time_now = time.time()
         if(self.time_prev != None):

@@ -61,17 +61,17 @@ class Setup:
             else:
                 print("The input must be an integer, please try again.")
 
-        def prompt_amount_of_goals(self):
-            """
-    		Function that prompts the user for the amount of players in the game.
-    		"""
-            while True:
-                amount_of_goals = input("How many goals to win? ")
-                if self.is_int(amount_of_goals):
-                    self.amount_of_goals = int(amount_of_goals)
-                    break
-                else:
-                    print("The input must be an integer, please try again.")
+    def prompt_amount_of_goals(self):
+        """
+        Function that prompts the user for the amount of players in the game.
+        """
+        while True:
+            amount_of_goals = input("How many goals to win? ")
+            if self.is_int(amount_of_goals):
+                self.amount_of_goals = int(amount_of_goals)
+                break
+            else:
+                print("The input must be an integer, please try again.")
 
     def prompt_ball_tag(self):
         """

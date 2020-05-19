@@ -15,6 +15,11 @@ class MockMultiTagPositioning:
 			#tag_ids[4]: TagPosition(700, 200),
 		}
 
+		# Constants to use for the mock get position
+		self.STEP_SIZE = 20
+		self.X_AXIS_LENGTH = 1000
+		self.Y_AXIS_LENGTH = 1000
+
 	def get_position(self, tag_id):
 		"""
 		Get the position of a tag and increments it's position with 1
@@ -22,12 +27,12 @@ class MockMultiTagPositioning:
 			tag_id(string): tag id of the player that we are getting the position for
 		"""
 		position = self.player_dict[tag_id]
-		random_x = random.randint(-2, 2)
-		random_y = random.randint(-2, 2)
+		random_x = random.randint(-self.STEP_SIZE, self.STEP_SIZE)
+		random_y = random.randint(-self.STEP_SIZE, self.STEP_SIZE)
 
-		if (random_x + self.player_dict[tag_id].x) > 0 and (random_x + self.player_dict[tag_id].x) < 1000 :
+		if 0 < random_x + self.player_dict[tag_id].x < self.X_AXIS_LENGTH:
 			self.player_dict[tag_id].x = self.player_dict[tag_id].x + random_x
-		if (random_y + self.player_dict[tag_id].y) > 0 and (random_y + self.player_dict[tag_id].y) < 1000:
+		if 0 < random_y + self.player_dict[tag_id].y < self.Y_AXIS_LENGTH:
 			self.player_dict[tag_id].y = self.player_dict[tag_id].y + random_y
 
 		return position

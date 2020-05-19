@@ -89,7 +89,7 @@ class Server:
         message = self.formatter.format_game_start()
         if self.setup.debug_mode:
             print('sending game start signal')
-        client_socket.sendall(message)
+        self.tcp_send(client_socket, message)
 
     def send_end_game(self, client_socket):
         """ Function that sends the formatted end game package to players
@@ -99,7 +99,7 @@ class Server:
         message = self.formatter.format_game_end()
         if self.setup.debug_mode:
             print('sending game start signal')
-        client_socket.sendall(message)
+        self.tcp_send(client_socket, message)
 
     def send_end_all_players(self):
         """ Function to send an endgame message to all connected players """
@@ -210,7 +210,7 @@ class Server:
         message = self.formatter.format_player_goal_amount(self.setup.amount_of_players, self.setup.amount_of_goals)
         if self.setup.debug_mode:
             print('sending', message, 'to', player_connection.addr)
-        client_socket.sendall(message)
+        self.tcp_send(client_socket, message)
 
     def send_player_tag(self, client_socket, player_connection):
         """ Sends the player tag that the client will be using in the game 
@@ -221,7 +221,7 @@ class Server:
         message = self.formatter.format_player_tag(player_connection.player_id, player_connection.tag_id)
         if self.setup.debug_mode:
             print('sending', message, 'to', player_connection.addr)
-        client_socket.sendall(message)
+        self.tcp_send(client_socket, message)
 
     def send_anchor_positions_to_client(self, client_socket, player_connection):
         """ Broadcasts the anchor positions
@@ -234,7 +234,7 @@ class Server:
             message = self.formatter.format_anchor_position(i, int(anchor.x), int(anchor.y))
             if self.setup.debug_mode:
                 print('sending', message, 'to', player_connection.addr)
-            client_socket.sendall(message)
+            self.tcp_send(client_socket, message)
 
     def send_goalzone_positions(self, client_socket):
         """ Broadcasts the goalzone positions
@@ -245,8 +245,8 @@ class Server:
                                                                 int(self.goalzone_generator.center_of_blue_goal[1]), int(self.goalzone_generator.goal_zone_middle_offset))
         red_team_message = self.formatter.format_goal_position(1, int(self.goalzone_generator.center_of_red_goal[0]), 
                                                                 int(self.goalzone_generator.center_of_red_goal[1]), int(self.goalzone_generator.goal_zone_middle_offset))
-        client_socket.sendall(blue_team_message)
-        client_socket.sendall(red_team_message)
+        self.tcp_send(client_socket, blue_team_message)
+        self.tcp_send(client_socket, red_team_message)
 
     def send_goal_scored(self, client_socket):
         """Broadcasts that a goal was scored for either team
@@ -254,11 +254,63 @@ class Server:
                 client_socket (socket): The socket with connection to the client
         """
         goal_message = self.formatter.format_goal_scored(self.setup.teams[0].score, self.setup.teams[1].score)
-        client_socket.sendall(goal_message)
+        self.tcp_send(client_socket, goal_message)
 
 
+    def tcp_send(self, client_socket, message):
+        """
+        Sends a message on the tcp socket and handles any aborted connection errors that might have occured.
+        Parameters: 
+            player_connection (object): The player connection object containing information on the player that lost connection.
+            message (bytes): the message as bytes.
+        """
+        try:
+            client_socket.sendall(message)
+        except ConnectionAbortedError:
+            disconnected_player_con = next((x for x in self.player_connections if x.client_socket is client_socket), None)
+            if disconnected_player_con is not None:
+                print('Lost connection to client', disconnected_player_con.addr, 'with tag', disconnected_player_con.tag_id)
+                self.player_connections.remove(disconnected_player_con)
+                client_reconnection_thread = threading.Thread(
+                    # The function to execute on the thread
+                    target=self.reconnect_player,
+                    # The arguments passed to the function
+                    args=[disconnected_player_con]
+                )
+                # The client is handled on a thread to allow the server to go on
+                client_reconnection_thread.start()
 
+    def reconnect_player(self, player_connection):
+        """
+        Function to handle a player that is reconnectiong, should be called on its own thread.
+        Parameters:
+            player_connection (object): The player connection object containing information on the player that lost connection.
+        """
+        self.tcp_socket.listen()
+        self.tcp_socket.settimeout(60)
 
+        if self.setup.debug_mode:
+            print('Waiting for reconnection')
+        try:
+            conn, addr = self.tcp_socket.accept()
+        except socket.timeout:
+            print('Received no incoming connection')
+            self.tcp_socket.settimeout(2)
+            return
+        
+        # Check if it is the same IP that has reconnected
+        if player_connection.addr[0] == addr[0]:
+            player_connection.client_socket = conn
+            self.player_connections.append(player_connection)
+            self.send_anchor_positions_to_client(conn, player_connection)
+            self.send_player_goal_amount(conn, player_connection)
+            self.send_player_tag(conn, player_connection)
+            self.send_goalzone_positions(conn)
+            self.send_goal_scored(conn)
+            self.send_start_game(conn)
+
+            if self.setup.debug_mode:
+                print('Player reconnected from IP', addr)
 
 if __name__ == "__main__":
     server = Server(True)
