@@ -80,7 +80,7 @@ class Setup:
         while True:
             ball_tag = input("Ball tag: ")
             if self.is_hex(ball_tag):
-                self.ball_tag = ball_tag
+                self.ball_tag = int(ball_tag, 16)
                 break
             else:
                 print("Ball tag must be hexadecimal, please try again.")
@@ -96,7 +96,7 @@ class Setup:
                 string = input("Position of anchor {} (cm): ".format(i))
                 coordinates = string.split()
                 if self.verify_anchor_coordinates(coordinates) and self.is_hex(anchor_id):
-                    self.anchors.append(Anchor(anchor_id, coordinates[0], coordinates[1], coordinates[2]))
+                    self.anchors.append(Anchor(int(anchor_id, 16), int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
                     break
         self.anchors = self.sort_anchors()
 
@@ -146,7 +146,7 @@ class Setup:
                     player_tag = input("[{}] Player {}'s tag: "
                                        .format(self.TEAM_NAMES[1], i - (self.amount_of_players // 2)))
                 if self.is_hex(player_tag):
-                    self.player_tags.append(player_tag)
+                    self.player_tags.append(int(player_tag, 16))
                     break
                 else:
                     print("Player tag must be hexadecimal, please try again.")
